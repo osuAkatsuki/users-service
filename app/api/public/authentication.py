@@ -30,7 +30,10 @@ async def authenticate(
     if isinstance(response, Error):
         return JSONResponse(content=response.model_dump(), status_code=401)
 
-    http_response = JSONResponse(content={}, status_code=200)
+    http_response = JSONResponse(
+        content=response.identity.model_dump(),
+        status_code=200,
+    )
     http_response.set_cookie(
         "X-Akatsuki-Access-Token",
         value=response.access_token,

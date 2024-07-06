@@ -3,8 +3,6 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-import app.state
-from app import logger
 from app import security
 from app.common_types import UserPrivileges
 from app.errors import Error
@@ -13,8 +11,15 @@ from app.repositories import access_tokens
 from app.repositories import users
 
 
+class Identity(BaseModel):
+    user_id: int
+    username: str
+    privileges: UserPrivileges
+
+
 class AuthorizationGrant(BaseModel):
     access_token: str
+    identity: Identity
     privileges: UserPrivileges
     expires_at: datetime | None
 
@@ -72,4 +77,9 @@ async def authenticate(
         access_token=access_token.access_token,
         privileges=access_token.privileges,
         expires_at=None,
+        identity=Identity(
+            user_id=user.id,
+            username=user.username,
+            privileges=user.privileges,
+        ),
     )
