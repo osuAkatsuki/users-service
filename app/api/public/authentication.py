@@ -18,7 +18,7 @@ class AuthenticationRequest(BaseModel):
 @router.post("/public/api/v1/authenticate")
 async def authenticate(
     args: AuthenticationRequest,
-    client_ip_address: str = Header(..., alias="CF-Connecting-IP"),
+    client_ip_address: str = Header(..., alias="X-Real-IP"),
     client_user_agent: str = Header(..., alias="User-Agent"),
 ) -> Response:
     response = await authentication.authenticate(
