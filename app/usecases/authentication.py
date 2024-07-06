@@ -42,7 +42,7 @@ async def authenticate(
     if user.privileges & UserPrivileges.USER_PENDING_VERIFICATION != 0:
         return Error(
             error_code=ErrorCode.PENDING_VERIFICATION,
-            user_feedback="Pending verification.",
+            user_feedback="You must login with the osu! client first.",
         )
 
     if user.privileges & UserPrivileges.USER_NORMAL == 0:
