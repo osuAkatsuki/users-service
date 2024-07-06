@@ -6,3 +6,4 @@ httpx
 python-dotenv
 python-json-logger
 uvicorn
+bcrypt
