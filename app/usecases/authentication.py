@@ -1,11 +1,16 @@
-from datetime import datetime
 import logging
-from app import logger, security
-from app.common_types import UserPrivileges
-from app.repositories import access_tokens, users
-import app.state
-from app.errors import Error, ErrorCode
+from datetime import datetime
+
 from pydantic import BaseModel
+
+import app.state
+from app import logger
+from app import security
+from app.common_types import UserPrivileges
+from app.errors import Error
+from app.errors import ErrorCode
+from app.repositories import access_tokens
+from app.repositories import users
 
 
 class AuthorizationGrant(BaseModel):

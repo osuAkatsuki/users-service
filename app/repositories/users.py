@@ -1,6 +1,7 @@
 from pydantic import BaseModel
-from app.common_types import UserPrivileges
+
 import app.state
+from app.common_types import UserPrivileges
 
 
 class User(BaseModel):

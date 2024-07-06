@@ -1,8 +1,9 @@
-from pydantic import BaseModel
-from app.common_types import UserPrivileges
-import app.state
-
 import hashlib
+
+from pydantic import BaseModel
+
+import app.state
+from app.common_types import UserPrivileges
 
 
 class AccessToken(BaseModel):

@@ -1,8 +1,9 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
-from fastapi import Response
 from fastapi import Header
+from fastapi import Response
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
 from app.errors import Error
 from app.usecases import authentication
 

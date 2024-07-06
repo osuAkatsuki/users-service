@@ -1,4 +1,5 @@
 aiobotocore
+bcrypt
 cryptography
 databases[aiomysql]
 fastapi
@@ -6,4 +7,3 @@ httpx
 python-dotenv
 python-json-logger
 uvicorn
-bcrypt
