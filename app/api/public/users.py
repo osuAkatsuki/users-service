@@ -9,6 +9,7 @@ from app.usecases import users
 
 router = APIRouter(tags=["(Public) Users API"])
 
+
 def map_error_code_to_http_status_code(error_code: ErrorCode) -> int:
     return _error_code_to_http_status_code_map[error_code]
 

@@ -1,13 +1,24 @@
 from datetime import datetime
-
 from pydantic import BaseModel
 
 from app.common_types import GameMode
 from app.common_types import UserPlayStyle
-from app.models.badge import Badge
-from app.models.custom_badge import CustomBadge
-from app.models.tournament_badge import TournamentBadge
 
+class TournamentBadge(BaseModel):
+    id: int
+    name: str
+    icon: str
+
+class CustomBadge(BaseModel):
+    name: str
+    icon: str
+    enabled: bool
+
+class Badge(BaseModel):
+    id: int
+    name: str
+    icon: str
+    colour: str
 
 class User(BaseModel):
     id: int
