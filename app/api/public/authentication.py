@@ -1,10 +1,11 @@
 from fastapi import APIRouter
 from fastapi import Header
 from fastapi import Response
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from app.api.responses import JSONResponse
 from app.errors import Error
+from app.errors import map_error_code_to_http_status_code
 from app.usecases import authentication
 
 router = APIRouter(tags=["(Public) Web Authentication API"])
@@ -28,7 +29,10 @@ async def authenticate(
         client_user_agent=client_user_agent,
     )
     if isinstance(response, Error):
-        return JSONResponse(content=response.model_dump(), status_code=401)
+        return JSONResponse(
+            content=response.model_dump(),
+            status_code=map_error_code_to_http_status_code(response.error_code),
+        )
 
     http_response = JSONResponse(
         content=response.identity.model_dump(),
