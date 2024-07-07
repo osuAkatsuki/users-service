@@ -8,9 +8,7 @@ import fastapi.responses
 class JSONEncoder(json.JSONEncoder):
     def default(self, o: typing.Any) -> typing.Any:
         if isinstance(o, datetime.datetime):
-            tz_suffix = "Z" if o.tzinfo in (None, datetime.UTC) else "%z"
-            year_str = o.strftime("%Y").zfill(4)
-            return o.strftime(f"{year_str}-%m-%dT%H:%M:%S{tz_suffix}")
+            return o.isoformat()
 
         return super().default(o)
 
