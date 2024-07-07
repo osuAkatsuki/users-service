@@ -7,7 +7,7 @@ from app.errors import Error
 from app.errors import ErrorCode
 from app.common_types import GameMode
 from app.common_types import RelaxMode
-from app.common_types import Mode
+from app.common_types import AkatsukiMode
 from app.usecases import user_stats
 
 router = APIRouter(tags=["(Public) User Stats API"])
@@ -30,9 +30,9 @@ async def get_user_stats(
     game_mode: GameMode = Query(...),
     relax_mode: RelaxMode = Query(...),
 ) -> Response:
-    mode = Mode.from_game_mode_and_relax_mode(game_mode, relax_mode)
+    akatsuki_mode = AkatsukiMode.from_game_mode_and_relax_mode(game_mode, relax_mode)
 
-    response = await user_stats.fetch_one_by_user_id_and_mode(user_id, mode)
+    response = await user_stats.fetch_one_by_user_id_and_akatsuki_mode(user_id, akatsuki_mode)
     if isinstance(response, Error):
         return JSONResponse(
             content=response.model_dump(),

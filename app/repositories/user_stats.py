@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from app.common_types import Mode
+from app.common_types import AkatsukiMode
 
 import app.state
 
@@ -30,17 +30,17 @@ READ_PARAMS = """\
     xh_count, x_count, sh_count, s_count, a_count, b_count, c_count, d_count, max_combo
 """
 
-async def fetch_one_by_user_id_and_mode(
+async def fetch_one_by_user_id_and_akatsuki_mode(
     user_id: int,
-    mode: Mode,
+    akatsuki_mode: AkatsukiMode,
 ) -> UserStats | None:
     query = f"""
         SELECT {READ_PARAMS}
         FROM user_stats
         WHERE user_id = :user_id
-        AND mode = :mode
+        AND mode = :akatsuki_mode
     """
-    params = {"user_id": user_id, "mode": mode.value}
+    params = {"user_id": user_id, "akatsuki_mode": akatsuki_mode.value}
 
     user_stats = await app.state.database.fetch_one(query, params)
     if user_stats is None:

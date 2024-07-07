@@ -53,7 +53,7 @@ class RelaxMode(IntEnum):
     AUTOPILOT = 2
 
 
-class Mode(IntEnum):
+class AkatsukiMode(IntEnum):
     OSU = 0
     TAIKO = 1
     CATCH = 2
@@ -69,12 +69,12 @@ class Mode(IntEnum):
     def from_game_mode_and_relax_mode(
         game_mode: GameMode,
         relax_mode: RelaxMode,
-    ) -> "Mode":
+    ) -> "AkatsukiMode":
         if relax_mode is RelaxMode.VANILLA:
-            return Mode(game_mode.value)
+            return AkatsukiMode(game_mode.value)
         elif relax_mode is RelaxMode.RELAX and game_mode is not GameMode.MANIA:
-            return Mode(game_mode.value + 4)
+            return AkatsukiMode(game_mode.value + 4)
         elif relax_mode is RelaxMode.AUTOPILOT and game_mode is GameMode.OSU:
-            return Mode.AUTOPILOT_OSU
+            return AkatsukiMode.AUTOPILOT_OSU
         else:
             raise ValueError("Unknown game_mode and relax_mode combo")

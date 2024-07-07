@@ -1,11 +1,11 @@
-from app.common_types import Mode
+from app.common_types import AkatsukiMode
 from app.models.user_stats import UserStats
 from app.errors import Error
 from app.errors import ErrorCode
 from app.repositories import user_stats
 
-async def fetch_one_by_user_id_and_mode(user_id: int, mode: Mode) -> UserStats | Error:
-    stats = await user_stats.fetch_one_by_user_id_and_mode(user_id, mode)
+async def fetch_one_by_user_id_and_akatsuki_mode(user_id: int, mode: AkatsukiMode) -> UserStats | Error:
+    stats = await user_stats.fetch_one_by_user_id_and_akatsuki_mode(user_id, mode)
     if stats is None:
         return Error(
             error_code=ErrorCode.NOT_FOUND,
