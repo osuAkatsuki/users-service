@@ -56,7 +56,7 @@ def init_middleware(app: FastAPI) -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["https://next.akatsuki.gg"],
+        allow_origins=["https://next.akatsuki.gg", "http://localhost:3000"],
         allow_methods=["*"],
         allow_headers=["*"],
         allow_credentials=True,
