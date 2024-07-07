@@ -22,7 +22,7 @@ async def fetch_one_by_username(username: str) -> User | Error:
     return User(
         id=user.id,
         username=user.username,
-        username_aka=user.nickname,
+        username_aka=user.username_aka,
         created_at=user.created_at,
         latest_activity=user.latest_activity,
         userpage_content=user.userpage_content,
@@ -70,7 +70,7 @@ async def fetch_one_by_user_id(user_id: int) -> User | Error:
     return User(
         id=user.id,
         username=user.username,
-        username_aka=user.nickname,
+        username_aka=user.username_aka,
         created_at=user.created_at,
         latest_activity=user.latest_activity,
         userpage_content=user.userpage_content,
