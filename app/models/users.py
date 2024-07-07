@@ -12,7 +12,6 @@ class TournamentBadge(BaseModel):
 class CustomBadge(BaseModel):
     name: str
     icon: str
-    enabled: bool
 
 class Badge(BaseModel):
     id: int
@@ -34,6 +33,8 @@ class User(BaseModel):
     play_style: UserPlayStyle
     badges: list[Badge]
     tournament_badges: list[TournamentBadge]
+    can_custom_badge: bool
+    show_custom_badge: bool
     custom_badge: CustomBadge
     silence_end: datetime
     silence_reason: str

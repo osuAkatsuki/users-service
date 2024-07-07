@@ -48,10 +48,11 @@ async def fetch_one_by_username(username: str) -> User | Error:
             )
             for tournament_badge in tournament_badges
         ],
+        can_custom_badge=user.can_custom_badge,
+        show_custom_badge=user.show_custom_badge,
         custom_badge=CustomBadge(
             name=user.custom_badge_name,
             icon=user.custom_badge_icon,
-            enabled=user.can_custom_badge and user.show_custom_badge,
         ),
         silence_end=user.silence_end,
         silence_reason=user.silence_reason,
@@ -96,10 +97,11 @@ async def fetch_one_by_user_id(user_id: int) -> User | Error:
             )
             for tournament_badge in tournament_badges
         ],
+        can_custom_badge=user.can_custom_badge,
+        show_custom_badge=user.show_custom_badge,
         custom_badge=CustomBadge(
             name=user.custom_badge_name,
             icon=user.custom_badge_icon,
-            enabled=user.can_custom_badge and user.show_custom_badge,
         ),
         silence_end=user.silence_end,
         silence_reason=user.silence_reason,
