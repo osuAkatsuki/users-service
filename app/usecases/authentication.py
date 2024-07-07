@@ -38,7 +38,7 @@ async def authenticate(
             user_feedback="Incorrect username or password.",
         )
 
-    if not security.check_password(password, user.hashed_password):
+    if not security.check_osu_password(password, user.hashed_password):
         return Error(
             error_code=ErrorCode.INCORRECT_CREDENTIALS,
             user_feedback="Incorrect username or password.",

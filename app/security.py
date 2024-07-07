@@ -1,14 +1,21 @@
+import hashlib
 import secrets
 
 import bcrypt
 
 
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+def hash_osu_password(password: str) -> str:
+    return bcrypt.hashpw(
+        hashlib.md5(password.encode()).hexdigest().encode(),
+        bcrypt.gensalt(),
+    ).decode()
 
 
-def check_password(password: str, hashed_password: str) -> bool:
-    return bcrypt.checkpw(password.encode(), hashed_password.encode())
+def check_osu_password(password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(
+        hashlib.md5(password.encode()).hexdigest().encode(),
+        hashed_password.encode(),
+    )
 
 
 def generate_access_token() -> str:
