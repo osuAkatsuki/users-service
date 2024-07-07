@@ -2,15 +2,18 @@ from pydantic import BaseModel
 
 import app.state
 
+
 class Badge(BaseModel):
     id: int
     name: str
     icon: str
     colour: str
 
+
 READ_PARAMS = """\
     badges.id, badges.name, badges.icon, badges.colour
 """
+
 
 async def fetch_all_by_user_id(user_id: int) -> list[Badge]:
     query = f"""\
@@ -29,7 +32,7 @@ async def fetch_all_by_user_id(user_id: int) -> list[Badge]:
             id=badge["id"],
             name=badge["name"],
             icon=badge["icon"],
-            colour=badge["colour"]
+            colour=badge["colour"],
         )
         for badge in badges
     ]

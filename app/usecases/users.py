@@ -1,26 +1,24 @@
-from app.models.user import User
+from app.errors import Error
+from app.errors import ErrorCode
 from app.models.badge import Badge
 from app.models.custom_badge import CustomBadge
 from app.models.tournament_badge import TournamentBadge
-from app.repositories import users
+from app.models.user import User
+from app.repositories import user_badges
 from app.repositories import user_relationships
 from app.repositories import user_tournament_badges
-from app.repositories import user_badges
-from app.errors import Error
-from app.errors import ErrorCode
+from app.repositories import users
+
 
 async def fetch_one_by_username(username: str) -> User | Error:
     user = await users.fetch_one_by_username(username)
     if user is None:
-        return Error(
-            error_code=ErrorCode.NOT_FOUND,
-            user_feedback="User not found."
-        )
-    
+        return Error(error_code=ErrorCode.NOT_FOUND, user_feedback="User not found.")
+
     followers = await user_relationships.fetch_follower_count_by_user_id(user.id)
     badges = await user_badges.fetch_all_by_user_id(user.id)
     tournament_badges = await user_tournament_badges.fetch_all_by_user_id(user.id)
-    
+
     return User(
         id=user.id,
         username=user.username,
@@ -59,13 +57,11 @@ async def fetch_one_by_username(username: str) -> User | Error:
         silence_reason=user.silence_reason,
     )
 
+
 async def fetch_one_by_user_id(user_id: int) -> User | Error:
     user = await users.fetch_one_by_user_id(user_id)
     if user is None:
-        return Error(
-            error_code=ErrorCode.NOT_FOUND,
-            user_feedback="User not found."
-        )
+        return Error(error_code=ErrorCode.NOT_FOUND, user_feedback="User not found.")
 
     followers = await user_relationships.fetch_follower_count_by_user_id(user.id)
     badges = await user_badges.fetch_all_by_user_id(user.id)

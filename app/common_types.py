@@ -1,5 +1,6 @@
-from enum import IntFlag
 from enum import IntEnum
+from enum import IntFlag
+
 
 class UserPrivileges(IntFlag):
     USER_PUBLIC = 1 << 0
@@ -27,6 +28,7 @@ class UserPrivileges(IntFlag):
     ADMIN_CAKER = 1 << 22
     USER_PREMIUM = 1 << 23
 
+
 class UserPlayStyle(IntFlag):
     MOUSE = 1 << 0
     TABLET = 1 << 1
@@ -37,6 +39,7 @@ class UserPlayStyle(IntFlag):
     OCULUS_RIFT = 1 << 6
     DICK = 1 << 7
     EGGPLANT = 1 << 8
+
 
 class GameMode(IntEnum):
     OSU = 0

@@ -2,14 +2,17 @@ from pydantic import BaseModel
 
 import app.state
 
+
 class TournamentBadge(BaseModel):
     id: int
     name: str
     icon: str
 
+
 READ_PARAMS = """\
     tourmnt_badges.id, tourmnt_badges.name, tourmnt_badges.icon
 """
+
 
 async def fetch_all_by_user_id(user_id: int) -> list[TournamentBadge]:
     query = f"""\

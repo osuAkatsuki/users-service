@@ -1,10 +1,11 @@
-from pydantic import BaseModel
 from datetime import datetime
 
+from pydantic import BaseModel
+
 import app.state
-from app.common_types import UserPrivileges
-from app.common_types import UserPlayStyle
 from app.common_types import GameMode
+from app.common_types import UserPlayStyle
+from app.common_types import UserPrivileges
 
 
 class User(BaseModel):
