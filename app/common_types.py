@@ -1,6 +1,5 @@
-from enum import IntEnum
 from enum import IntFlag
-
+from enum import IntEnum
 
 class UserPrivileges(IntFlag):
     USER_PUBLIC = 1 << 0
@@ -46,3 +45,36 @@ class GameMode(IntEnum):
     TAIKO = 1
     CATCH = 2
     MANIA = 3
+
+
+class RelaxMode(IntEnum):
+    VANILLA = 0
+    RELAX = 1
+    AUTOPILOT = 2
+
+
+class AkatsukiMode(IntEnum):
+    OSU = 0
+    TAIKO = 1
+    CATCH = 2
+    MANIA = 3
+
+    RELAX_OSU = 4
+    RELAX_TAIKO = 5
+    RELAX_CATCH = 6
+
+    AUTOPILOT_OSU = 8
+
+    @staticmethod
+    def from_game_mode_and_relax_mode(
+        game_mode: GameMode,
+        relax_mode: RelaxMode,
+    ) -> "AkatsukiMode":
+        if relax_mode is RelaxMode.VANILLA:
+            return AkatsukiMode(game_mode.value)
+        elif relax_mode is RelaxMode.RELAX and game_mode is not GameMode.MANIA:
+            return AkatsukiMode(game_mode.value + 4)
+        elif relax_mode is RelaxMode.AUTOPILOT and game_mode is GameMode.OSU:
+            return AkatsukiMode.AUTOPILOT_OSU
+        else:
+            raise ValueError("Unknown game_mode and relax_mode combo")
