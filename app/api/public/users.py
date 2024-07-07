@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from fastapi import Path
 from fastapi import Response
 
 from app.api.responses import JSONResponse
@@ -24,7 +23,7 @@ _error_code_to_http_status_code_map: dict[ErrorCode, int] = {
 
 
 @router.get("/public/api/v1/users/{user_id}")
-async def get_user(user_id: int = Path(...)) -> Response:
+async def get_user(user_id: int) -> Response:
     response = await users.fetch_one_by_user_id(user_id)
     if isinstance(response, Error):
         return JSONResponse(
