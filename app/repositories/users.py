@@ -14,7 +14,7 @@ class User(BaseModel):
     username_aka: str
     created_at: datetime
     latest_activity: datetime
-    userpage_content: str
+    userpage_content: str | None
     country: str
     privileges: UserPrivileges
     hashed_password: str

@@ -1,17 +1,21 @@
 from datetime import datetime
+
 from pydantic import BaseModel
 
 from app.common_types import GameMode
 from app.common_types import UserPlayStyle
+
 
 class TournamentBadge(BaseModel):
     id: int
     name: str
     icon: str
 
+
 class CustomBadge(BaseModel):
     name: str
     icon: str
+
 
 class Badge(BaseModel):
     id: int
@@ -19,13 +23,14 @@ class Badge(BaseModel):
     icon: str
     colour: str
 
+
 class User(BaseModel):
     id: int
     username: str
     username_aka: str
     created_at: datetime
     latest_activity: datetime
-    userpage_content: str
+    userpage_content: str | None
     country: str
     clan_id: int
     followers: int
