@@ -26,6 +26,8 @@ class UserPrivileges(IntFlag):
     USER_TOURNAMENT_STAFF = 1 << 21
     ADMIN_CAKER = 1 << 22
     USER_PREMIUM = 1 << 23
+    ADMIN_FREEZE_USERS = 1 << 24
+    ADMIN_MANAGE_NOMINATORS = 1 << 25
 
 
 class UserPlayStyle(IntFlag):
