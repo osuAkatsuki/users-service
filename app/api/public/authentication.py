@@ -52,7 +52,7 @@ async def authenticate(
         status_code=200,
     )
     http_response.set_cookie(
-        "X-Akatsuki-Access-Token",
+        "X-Ripple-Token",
         value=response.access_token,
         domain="akatsuki.gg",
         secure=True,
