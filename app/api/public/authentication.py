@@ -54,7 +54,8 @@ async def authenticate(
     http_response.set_cookie(
         "X-Ripple-Token",
         value=response.access_token,
-        domain="akatsuki.gg",
+        expires=60 * 60 * 24 * 30,
+        domain="next.akatsuki.gg",
         secure=True,
         httponly=True,
         samesite="lax",
