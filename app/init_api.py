@@ -7,7 +7,6 @@ from databases import Database
 from fastapi import FastAPI
 from fastapi import Request
 from fastapi import Response
-from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import RequestResponseEndpoint
 
 from app import logger
@@ -53,16 +52,6 @@ def init_middleware(app: FastAPI) -> FastAPI:
         except BaseException:
             logging.exception("Exception in ASGI application")
             return Response(status_code=500)
-
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["https://next.akatsuki.gg", "http://localhost:3000"],
-        allow_methods=["*"],
-        allow_headers=["*"],
-        allow_credentials=True,
-        # NOTE: this does not expose credentials/http cookies
-        expose_headers=["*"],
-    )
 
     return app
 
