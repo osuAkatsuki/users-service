@@ -57,6 +57,6 @@ async def authenticate(
         domain="akatsuki.gg",
         secure=True,
         httponly=True,
-        samesite="strict",
+        samesite="lax",
     )
     return http_response
