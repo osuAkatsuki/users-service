@@ -55,7 +55,7 @@ async def authenticate(
         "X-Ripple-Token",
         value=response.access_token,
         expires=60 * 60 * 24 * 30,
-        domain="next.akatsuki.gg",
+        domain="akatsuki.gg",
         secure=True,
         httponly=True,
         samesite="strict",
