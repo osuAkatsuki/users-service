@@ -106,3 +106,14 @@ async def fetch_one_by_user_id(user_id: int) -> User | Error:
         silence_end=user.silence_end,
         silence_reason=user.silence_reason,
     )
+
+
+async def update_username(user_id: int, new_username: str) -> None | Error:
+    exists = await users.username_is_taken(new_username)
+    if exists:
+        return Error(
+            error_code=ErrorCode.USERNAME_ALREADY_TAKEN,
+            user_feedback="Username is already taken.",
+        )
+
+    await users.update_username(user_id, new_username)

@@ -102,3 +102,27 @@ async def fetch_one_by_user_id(user_id: int) -> User | None:
         silence_reason=user["silence_reason"],
         silence_end=user["silence_end"],
     )
+
+
+async def username_is_taken(username: str) -> bool:
+    query = """\
+        SELECT 1
+        FROM users
+        WHERE username_safe = :username_safe
+    """
+    username_safe = username.lower().replace(" ", "_")
+    params = {"username_safe": username_safe}
+
+    return await app.state.database.fetch_one(query, params) is not None
+
+
+async def update_username(user_id: int, new_username: str) -> None:
+    query = """\
+        UPDATE users
+        SET username = :new_username,
+            username_safe = :new_username_safe
+        WHERE id = :user_id
+    """
+    params = {"new_username": new_username, "user_id": user_id}
+
+    await app.state.database.execute(query, params)
