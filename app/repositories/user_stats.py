@@ -30,6 +30,7 @@ READ_PARAMS = """\
     xh_count, x_count, sh_count, s_count, a_count, b_count, c_count, d_count, max_combo
 """
 
+
 async def fetch_one_by_user_id_and_akatsuki_mode(
     user_id: int,
     akatsuki_mode: AkatsukiMode,
@@ -45,7 +46,7 @@ async def fetch_one_by_user_id_and_akatsuki_mode(
     user_stats = await app.state.database.fetch_one(query, params)
     if user_stats is None:
         return None
-    
+
     return UserStats(
         ranked_score=user_stats["ranked_score"],
         total_score=user_stats["total_score"],

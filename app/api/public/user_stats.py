@@ -12,6 +12,7 @@ from app.usecases import user_stats
 
 router = APIRouter(tags=["(Public) User Stats API"])
 
+
 def map_error_code_to_http_status_code(error_code: ErrorCode) -> int:
     return _error_code_to_http_status_code_map[error_code]
 
@@ -24,6 +25,7 @@ _error_code_to_http_status_code_map: dict[ErrorCode, int] = {
     ErrorCode.INTERNAL_SERVER_ERROR: 500,
 }
 
+
 @router.get("/public/api/v1/users/{user_id}/stats")
 async def get_user_stats(
     user_id: int,
@@ -32,7 +34,9 @@ async def get_user_stats(
 ) -> Response:
     akatsuki_mode = AkatsukiMode.from_game_mode_and_relax_mode(game_mode, relax_mode)
 
-    response = await user_stats.fetch_one_by_user_id_and_akatsuki_mode(user_id, akatsuki_mode)
+    response = await user_stats.fetch_one_by_user_id_and_akatsuki_mode(
+        user_id, akatsuki_mode
+    )
     if isinstance(response, Error):
         return JSONResponse(
             content=response.model_dump(),
@@ -43,4 +47,3 @@ async def get_user_stats(
         content=response.model_dump(),
         status_code=200,
     )
-
