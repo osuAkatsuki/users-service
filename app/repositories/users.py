@@ -123,6 +123,11 @@ async def update_username(user_id: int, new_username: str) -> None:
             username_safe = :new_username_safe
         WHERE id = :user_id
     """
-    params = {"new_username": new_username, "user_id": user_id}
+    new_username_safe = new_username.lower().replace(" ", "_")
+    params = {
+        "new_username": new_username,
+        "new_username_safe": new_username_safe,
+        "user_id": user_id,
+    }
 
     await app.state.database.execute(query, params)
