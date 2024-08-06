@@ -112,7 +112,7 @@ async def update_username(user_id: int, new_username: str) -> None | Error:
     exists = await users.username_is_taken(new_username)
     if exists:
         return Error(
-            error_code=ErrorCode.USERNAME_ALREADY_TAKEN,
+            error_code=ErrorCode.CONFLICT,
             user_feedback="Username is already taken.",
         )
 

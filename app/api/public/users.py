@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Cookie
 from fastapi import Response
 from pydantic import BaseModel
@@ -12,7 +13,15 @@ router = APIRouter(tags=["(Public) Users API"])
 
 
 def map_error_code_to_http_status_code(error_code: ErrorCode) -> int:
-    return _error_code_to_http_status_code_map[error_code]
+    status_code = _error_code_to_http_status_code_map.get(error_code)
+    if status_code is None:
+        logging.warning(
+            "No HTTP status code mapping found for error code: %s",
+            error_code,
+            extra={"error_code": error_code},
+        )
+        return 500
+    return status_code
 
 
 _error_code_to_http_status_code_map: dict[ErrorCode, int] = {
@@ -20,6 +29,7 @@ _error_code_to_http_status_code_map: dict[ErrorCode, int] = {
     ErrorCode.INSUFFICIENT_PRIVILEGES: 401,
     ErrorCode.PENDING_VERIFICATION: 401,
     ErrorCode.NOT_FOUND: 404,
+    ErrorCode.CONFLICT: 409,
     ErrorCode.INTERNAL_SERVER_ERROR: 500,
 }
 
