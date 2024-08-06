@@ -1,3 +1,4 @@
+from app.common_types import UserPrivileges
 from app.errors import Error
 from app.errors import ErrorCode
 from app.models.users import Badge
@@ -109,6 +110,21 @@ async def fetch_one_by_user_id(user_id: int) -> User | Error:
 
 
 async def update_username(user_id: int, new_username: str) -> None | Error:
+    user = await users.fetch_one_by_user_id(user_id)
+    if user is None:
+        return Error(
+            error_code=ErrorCode.NOT_FOUND,
+            user_feedback="User not found.",
+        )
+
+    # TODO: implement the one-free-name-change policy
+
+    if not user.privileges & UserPrivileges.USER_DONOR:
+        return Error(
+            error_code=ErrorCode.INSUFFICIENT_PRIVILEGES,
+            user_feedback="Only donor may change their usernames.",
+        )
+
     exists = await users.username_is_taken(new_username)
     if exists:
         return Error(
