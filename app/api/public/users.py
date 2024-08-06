@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Cookie, HTTPException
+from fastapi import APIRouter, Cookie
 from fastapi import Response
+from pydantic import BaseModel
 
 from app.api import authorization
 from app.api.responses import JSONResponse
 from app.errors import Error
 from app.errors import ErrorCode
-from app.repositories.access_tokens import AccessToken
 from app.usecases import users
 
 router = APIRouter(tags=["(Public) Users API"])
@@ -39,10 +39,14 @@ async def get_user(user_id: int) -> Response:
     )
 
 
+class UsernameUpdate(BaseModel):
+    new_username: str
+
+
 @router.put("/public/api/v1/users/{user_id}/username")
 async def update_username(
     user_id: int,
-    new_username: str,
+    args: UsernameUpdate,
     user_access_token: str = Cookie(..., alias="X-Ripple-Token", strict=True),
 ) -> Response:
     trusted_access_token = await authorization.authorize_request(
@@ -57,7 +61,7 @@ async def update_username(
             ),
         )
 
-    response = await users.update_username(user_id, new_username)
+    response = await users.update_username(user_id, args.new_username)
     if isinstance(response, Error):
         return JSONResponse(
             content=response.model_dump(),
