@@ -133,3 +133,4 @@ async def update_username(user_id: int, new_username: str) -> None | Error:
         )
 
     await users.update_username(user_id, new_username)
+    return None
