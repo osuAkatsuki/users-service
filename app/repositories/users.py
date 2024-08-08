@@ -133,14 +133,14 @@ async def update_username(user_id: int, new_username: str) -> None:
     await app.state.database.execute(query, params)
 
 
-async def update_password(user_id: int, new_password: str) -> None:
+async def update_password(user_id: int, *, new_hashed_password: str) -> None:
     query = """\
         UPDATE users
-        SET password_md5 = :new_password
+        SET password_md5 = :new_hashed_password
         WHERE id = :user_id
     """
     params = {
-        "new_password": new_password,
+        "new_hashed_password": new_hashed_password,
         "user_id": user_id,
     }
 

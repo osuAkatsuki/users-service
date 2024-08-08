@@ -159,7 +159,8 @@ async def update_password(
             user_feedback="Incorrect password.",
         )
 
-    await users.update_password(user_id, new_password)
+    hashed_password = security.hash_osu_password(new_password)
+    await users.update_password(user_id, new_hashed_password=hashed_password)
     return None
 
 
