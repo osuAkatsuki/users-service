@@ -123,7 +123,7 @@ class EmailAddressUpdate(BaseModel):
     new_email_address: str
 
 
-@router.put("/public/api/v1/users/{user_id}/email")
+@router.put("/public/api/v1/users/{user_id}/email-address")
 async def update_email_address(
     user_id: int,
     args: EmailAddressUpdate,
