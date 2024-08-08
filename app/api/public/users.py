@@ -71,7 +71,7 @@ async def update_username(
             ),
         )
 
-    response = await users.update_username(user_id, args.new_username)
+    response = await users.update_username(user_id, new_username=args.new_username)
     if isinstance(response, Error):
         return JSONResponse(
             content=response.model_dump(),
@@ -105,7 +105,9 @@ async def update_password(
         )
 
     response = await users.update_password(
-        user_id, args.current_password, args.new_password
+        user_id,
+        current_password=args.current_password,
+        new_password=args.new_password,
     )
     if isinstance(response, Error):
         return JSONResponse(
@@ -140,7 +142,9 @@ async def update_email_address(
         )
 
     response = await users.update_email_address(
-        user_id, args.current_password, args.new_email_address
+        user_id,
+        current_password=args.current_password,
+        new_email_address=args.new_email_address,
     )
     if isinstance(response, Error):
         return JSONResponse(

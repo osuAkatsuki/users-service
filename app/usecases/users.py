@@ -110,7 +110,7 @@ async def fetch_one_by_user_id(user_id: int) -> User | Error:
     )
 
 
-async def update_username(user_id: int, new_username: str) -> None | Error:
+async def update_username(user_id: int, *, new_username: str) -> None | Error:
     user = await users.fetch_one_by_user_id(user_id)
     if user is None:
         return Error(
@@ -138,7 +138,10 @@ async def update_username(user_id: int, new_username: str) -> None | Error:
 
 
 async def update_password(
-    user_id: int, current_password: str, new_password: str
+    user_id: int,
+    *,
+    current_password: str,
+    new_password: str,
 ) -> None | Error:
     user = await users.fetch_one_by_user_id(user_id)
     if user is None:
@@ -158,7 +161,10 @@ async def update_password(
 
 
 async def update_email_address(
-    user_id: int, current_password: str, new_email_address: str
+    user_id: int,
+    *,
+    current_password: str,
+    new_email_address: str,
 ) -> None | Error:
     user = await users.fetch_one_by_user_id(user_id)
     if user is None:
