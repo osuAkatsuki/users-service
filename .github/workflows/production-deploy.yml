@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - authd-username-update-api
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
