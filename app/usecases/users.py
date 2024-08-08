@@ -1,3 +1,4 @@
+from app import security
 from app.common_types import UserPrivileges
 from app.errors import Error
 from app.errors import ErrorCode
@@ -133,4 +134,44 @@ async def update_username(user_id: int, new_username: str) -> None | Error:
         )
 
     await users.update_username(user_id, new_username)
+    return None
+
+
+async def update_password(
+    user_id: int, current_password: str, new_password: str
+) -> None | Error:
+    user = await users.fetch_one_by_user_id(user_id)
+    if user is None:
+        return Error(
+            error_code=ErrorCode.NOT_FOUND,
+            user_feedback="User not found.",
+        )
+
+    if security.check_osu_password(user.hashed_password, current_password):
+        return Error(
+            error_code=ErrorCode.INCORRECT_CREDENTIALS,
+            user_feedback="Incorrect password.",
+        )
+
+    await users.update_password(user_id, new_password)
+    return None
+
+
+async def update_email_address(
+    user_id: int, current_password: str, new_email_address: str
+) -> None | Error:
+    user = await users.fetch_one_by_user_id(user_id)
+    if user is None:
+        return Error(
+            error_code=ErrorCode.NOT_FOUND,
+            user_feedback="User not found.",
+        )
+
+    if security.check_osu_password(user.hashed_password, current_password):
+        return Error(
+            error_code=ErrorCode.INCORRECT_CREDENTIALS,
+            user_feedback="Incorrect password.",
+        )
+
+    await users.update_email_address(user_id, new_email_address)
     return None
