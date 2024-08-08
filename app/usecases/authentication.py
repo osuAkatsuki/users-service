@@ -97,7 +97,7 @@ async def logout(
     client_ip_address: str,
     client_user_agent: str,
     trusted_access_token: access_tokens.AccessToken,
-) -> None:
+) -> None | Error:
     await access_tokens.delete_one(trusted_access_token.hashed_access_token)
 
     logging.info(
