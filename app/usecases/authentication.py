@@ -86,3 +86,24 @@ async def authenticate(
             privileges=user.privileges,
         ),
     )
+
+
+async def logout(
+    *,
+    user_id: int,
+    client_ip_address: str,
+    client_user_agent: str,
+    trusted_access_token: access_tokens.AccessToken,
+) -> None:
+    await access_tokens.delete_one(trusted_access_token.access_token)
+
+    logging.info(
+        "User successfully logged out",
+        extra={
+            "user_id": user_id,
+            "client_ip_address": client_ip_address,
+            "client_user_agent": client_user_agent,
+        },
+    )
+
+    return None

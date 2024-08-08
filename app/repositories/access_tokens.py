@@ -62,3 +62,12 @@ async def fetch_one(access_token: str) -> AccessToken | None:
         description=rec["description"],
         private=rec["private"],
     )
+
+
+async def delete_one(access_token: str) -> None:
+    query = """\
+        DELETE FROM tokens
+        WHERE token = :access_token
+    """
+    params = {"access_token": access_token}
+    await app.state.database.execute(query, params)
