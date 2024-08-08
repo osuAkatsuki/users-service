@@ -97,5 +97,8 @@ async def logout(
     http_response.delete_cookie(
         "X-Ripple-Token",
         domain="akatsuki.gg",
+        secure=True,
+        httponly=True,
+        samesite="none",
     )
     return http_response
