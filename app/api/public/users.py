@@ -79,3 +79,73 @@ async def update_username(
         )
 
     return Response(status_code=204)
+
+
+class PasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.put("/public/api/v1/users/{user_id}/password")
+async def update_password(
+    user_id: int,
+    args: PasswordUpdate,
+    user_access_token: str = Cookie(..., alias="X-Ripple-Token", strict=True),
+) -> Response:
+    trusted_access_token = await authorization.authorize_request(
+        user_access_token=user_access_token,
+        expected_user_id=user_id,
+    )
+    if isinstance(trusted_access_token, Error):
+        return JSONResponse(
+            content=trusted_access_token.model_dump(),
+            status_code=map_error_code_to_http_status_code(
+                trusted_access_token.error_code
+            ),
+        )
+
+    response = await users.update_password(
+        user_id, args.current_password, args.new_password
+    )
+    if isinstance(response, Error):
+        return JSONResponse(
+            content=response.model_dump(),
+            status_code=map_error_code_to_http_status_code(response.error_code),
+        )
+
+    return Response(status_code=204)
+
+
+class EmailAddressUpdate(BaseModel):
+    current_password: str
+    new_email_address: str
+
+
+@router.put("/public/api/v1/users/{user_id}/email")
+async def update_email_address(
+    user_id: int,
+    args: EmailAddressUpdate,
+    user_access_token: str = Cookie(..., alias="X-Ripple-Token", strict=True),
+) -> Response:
+    trusted_access_token = await authorization.authorize_request(
+        user_access_token=user_access_token,
+        expected_user_id=user_id,
+    )
+    if isinstance(trusted_access_token, Error):
+        return JSONResponse(
+            content=trusted_access_token.model_dump(),
+            status_code=map_error_code_to_http_status_code(
+                trusted_access_token.error_code
+            ),
+        )
+
+    response = await users.update_email_address(
+        user_id, args.current_password, args.new_email_address
+    )
+    if isinstance(response, Error):
+        return JSONResponse(
+            content=response.model_dump(),
+            status_code=map_error_code_to_http_status_code(response.error_code),
+        )
+
+    return Response(status_code=204)
