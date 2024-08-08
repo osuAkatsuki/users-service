@@ -1,3 +1,5 @@
+from app import security
+from app.common_types import UserPrivileges
 from app.errors import Error
 from app.errors import ErrorCode
 from app.models.users import Badge
@@ -106,3 +108,83 @@ async def fetch_one_by_user_id(user_id: int) -> User | Error:
         silence_end=user.silence_end,
         silence_reason=user.silence_reason,
     )
+
+
+async def update_username(user_id: int, *, new_username: str) -> None | Error:
+    user = await users.fetch_one_by_user_id(user_id)
+    if user is None:
+        return Error(
+            error_code=ErrorCode.NOT_FOUND,
+            user_feedback="User not found.",
+        )
+
+    # TODO: implement the one-free-name-change policy
+
+    if not user.privileges & UserPrivileges.USER_DONOR:
+        return Error(
+            error_code=ErrorCode.INSUFFICIENT_PRIVILEGES,
+            user_feedback="Only donor may change their usernames.",
+        )
+
+    exists = await users.username_is_taken(new_username)
+    if exists:
+        return Error(
+            error_code=ErrorCode.CONFLICT,
+            user_feedback="Username is already taken.",
+        )
+
+    await users.update_username(user_id, new_username)
+    return None
+
+
+async def update_password(
+    user_id: int,
+    *,
+    current_password: str,
+    new_password: str,
+) -> None | Error:
+    user = await users.fetch_one_by_user_id(user_id)
+    if user is None:
+        return Error(
+            error_code=ErrorCode.NOT_FOUND,
+            user_feedback="User not found.",
+        )
+
+    if not security.check_osu_password(
+        untrusted_password=current_password,
+        hashed_password=user.hashed_password,
+    ):
+        return Error(
+            error_code=ErrorCode.INCORRECT_CREDENTIALS,
+            user_feedback="Incorrect password.",
+        )
+
+    hashed_password = security.hash_osu_password(new_password)
+    await users.update_password(user_id, new_hashed_password=hashed_password)
+    return None
+
+
+async def update_email_address(
+    user_id: int,
+    *,
+    current_password: str,
+    new_email_address: str,
+) -> None | Error:
+    user = await users.fetch_one_by_user_id(user_id)
+    if user is None:
+        return Error(
+            error_code=ErrorCode.NOT_FOUND,
+            user_feedback="User not found.",
+        )
+
+    if not security.check_osu_password(
+        untrusted_password=current_password,
+        hashed_password=user.hashed_password,
+    ):
+        return Error(
+            error_code=ErrorCode.INCORRECT_CREDENTIALS,
+            user_feedback="Incorrect password.",
+        )
+
+    await users.update_email_address(user_id, new_email_address)
+    return None

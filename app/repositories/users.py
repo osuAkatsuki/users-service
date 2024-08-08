@@ -102,3 +102,60 @@ async def fetch_one_by_user_id(user_id: int) -> User | None:
         silence_reason=user["silence_reason"],
         silence_end=user["silence_end"],
     )
+
+
+async def username_is_taken(username: str) -> bool:
+    query = """\
+        SELECT 1
+        FROM users
+        WHERE username_safe = :username_safe
+    """
+    username_safe = username.lower().replace(" ", "_")
+    params = {"username_safe": username_safe}
+
+    return await app.state.database.fetch_one(query, params) is not None
+
+
+async def update_username(user_id: int, new_username: str) -> None:
+    query = """\
+        UPDATE users
+        SET username = :new_username,
+            username_safe = :new_username_safe
+        WHERE id = :user_id
+    """
+    new_username_safe = new_username.lower().replace(" ", "_")
+    params = {
+        "new_username": new_username,
+        "new_username_safe": new_username_safe,
+        "user_id": user_id,
+    }
+
+    await app.state.database.execute(query, params)
+
+
+async def update_password(user_id: int, *, new_hashed_password: str) -> None:
+    query = """\
+        UPDATE users
+        SET password_md5 = :new_hashed_password
+        WHERE id = :user_id
+    """
+    params = {
+        "new_hashed_password": new_hashed_password,
+        "user_id": user_id,
+    }
+
+    await app.state.database.execute(query, params)
+
+
+async def update_email_address(user_id: int, new_email_address: str) -> None:
+    query = """\
+        UPDATE users
+        SET email = :new_email_address
+        WHERE id = :user_id
+    """
+    params = {
+        "new_email_address": new_email_address,
+        "user_id": user_id,
+    }
+
+    await app.state.database.execute(query, params)

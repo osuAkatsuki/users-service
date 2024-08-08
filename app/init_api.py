@@ -6,14 +6,16 @@ import aiobotocore.session
 from databases import Database
 from fastapi import FastAPI
 from fastapi import Request
+from fastapi.exceptions import RequestValidationError
 from fastapi import Response
 from starlette.middleware.base import RequestResponseEndpoint
-
+from fastapi.exception_handlers import request_validation_exception_handler
 from app import logger
 from app import settings
 from app import state
 from app.adapters import mysql
 from app.api import api_router
+from fastapi.responses import JSONResponse
 
 
 @asynccontextmanager
@@ -52,6 +54,17 @@ def init_middleware(app: FastAPI) -> FastAPI:
         except BaseException:
             logging.exception("Exception in ASGI application")
             return Response(status_code=500)
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
+        logging.warning(
+            "Request validation failed",
+            extra={"body": exc.body, "path": request.url.path},
+            exc_info=exc,
+        )
+        return await request_validation_exception_handler(request, exc)
 
     return app
 

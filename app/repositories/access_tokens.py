@@ -42,3 +42,23 @@ async def create(*, user_id: int, access_token: str) -> AccessToken:
         description=rec["description"],
         private=rec["private"],
     )
+
+
+async def fetch_one(access_token: str) -> AccessToken | None:
+    query = """\
+        SELECT user, privileges, description, private
+        FROM tokens
+        WHERE token = :access_token
+    """
+    params = {"access_token": access_token}
+    rec = await app.state.database.fetch_one(query, params)
+    if rec is None:
+        return None
+
+    return AccessToken(
+        access_token=access_token,
+        user_id=rec["user"],
+        privileges=UserPrivileges(rec["privileges"]),
+        description=rec["description"],
+        private=rec["private"],
+    )
