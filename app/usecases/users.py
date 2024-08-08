@@ -150,7 +150,7 @@ async def update_password(
             user_feedback="User not found.",
         )
 
-    if security.check_osu_password(
+    if not security.check_osu_password(
         untrusted_password=current_password,
         hashed_password=user.hashed_password,
     ):
@@ -176,7 +176,7 @@ async def update_email_address(
             user_feedback="User not found.",
         )
 
-    if security.check_osu_password(
+    if not security.check_osu_password(
         untrusted_password=current_password,
         hashed_password=user.hashed_password,
     ):
