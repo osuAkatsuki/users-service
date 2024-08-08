@@ -18,7 +18,7 @@ class Identity(BaseModel):
 
 
 class AuthorizationGrant(BaseModel):
-    access_token: str
+    unhashed_access_token: str
     identity: Identity
     privileges: UserPrivileges
     expires_at: datetime | None
@@ -59,9 +59,11 @@ async def authenticate(
             user_feedback="Insufficient privileges.",
         )
 
+    unhashed_access_token = security.generate_unhashed_access_token()
+    hashed_access_token = security.hash_access_token(unhashed_access_token)
     access_token = await access_tokens.create(
         user_id=user.id,
-        access_token=security.generate_access_token(),
+        hashed_access_token=hashed_access_token,
     )
 
     # TODO: log amplitude web_login event
@@ -77,7 +79,8 @@ async def authenticate(
     )
 
     return AuthorizationGrant(
-        access_token=access_token.access_token,
+        # XXX: intentionally send back the unhashed access token
+        unhashed_access_token=unhashed_access_token,
         privileges=access_token.privileges,
         expires_at=None,
         identity=Identity(
@@ -86,3 +89,23 @@ async def authenticate(
             privileges=user.privileges,
         ),
     )
+
+
+async def logout(
+    *,
+    client_ip_address: str,
+    client_user_agent: str,
+    trusted_access_token: access_tokens.AccessToken,
+) -> None | Error:
+    await access_tokens.delete_one(trusted_access_token.hashed_access_token)
+
+    logging.info(
+        "User successfully logged out",
+        extra={
+            "user_id": trusted_access_token.user_id,
+            "client_ip_address": client_ip_address,
+            "client_user_agent": client_user_agent,
+        },
+    )
+
+    return None

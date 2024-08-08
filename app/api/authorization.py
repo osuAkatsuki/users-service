@@ -1,4 +1,4 @@
-import hashlib
+from app import security
 from app.errors import Error, ErrorCode
 from app.repositories import access_tokens
 
@@ -8,10 +8,7 @@ async def authorize_request(
     user_access_token: str,
     expected_user_id: int | None = None,
 ) -> access_tokens.AccessToken | Error:
-    hashed_access_token = hashlib.md5(
-        user_access_token.encode(),
-        usedforsecurity=False,
-    ).hexdigest()
+    hashed_access_token = security.hash_access_token(user_access_token)
     trusted_access_token = await access_tokens.fetch_one(hashed_access_token)
     if trusted_access_token is None:
         return Error(
