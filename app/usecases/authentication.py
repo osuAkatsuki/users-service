@@ -93,7 +93,6 @@ async def authenticate(
 
 async def logout(
     *,
-    user_id: int,
     client_ip_address: str,
     client_user_agent: str,
     trusted_access_token: access_tokens.AccessToken,
@@ -103,7 +102,7 @@ async def logout(
     logging.info(
         "User successfully logged out",
         extra={
-            "user_id": user_id,
+            "user_id": trusted_access_token.user_id,
             "client_ip_address": client_ip_address,
             "client_user_agent": client_user_agent,
         },

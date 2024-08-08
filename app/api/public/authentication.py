@@ -64,20 +64,15 @@ async def authenticate(
     return http_response
 
 
-class LogoutRequest(BaseModel):
-    user_id: int
-
-
 @router.post("/public/api/v1/logout")
 async def logout(
-    args: LogoutRequest,
     client_ip_address: str = Header(..., alias="X-Real-IP"),
     client_user_agent: str = Header(..., alias="User-Agent"),
     user_access_token: str = Cookie(..., alias="X-Ripple-Token", strict=True),
 ) -> Response:
     trusted_access_token = await authorization.authorize_request(
         user_access_token=user_access_token,
-        expected_user_id=args.user_id,
+        expected_user_id=None,
     )
     if isinstance(trusted_access_token, Error):
         return JSONResponse(
@@ -88,7 +83,6 @@ async def logout(
         )
 
     response = await authentication.logout(
-        user_id=args.user_id,
         client_ip_address=client_ip_address,
         client_user_agent=client_user_agent,
         trusted_access_token=trusted_access_token,
