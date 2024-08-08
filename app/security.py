@@ -11,9 +11,9 @@ def hash_osu_password(password: str) -> str:
     ).decode()
 
 
-def check_osu_password(password: str, hashed_password: str) -> bool:
+def check_osu_password(*, untrusted_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(
-        hashlib.md5(password.encode()).hexdigest().encode(),
+        hashlib.md5(untrusted_password.encode()).hexdigest().encode(),
         hashed_password.encode(),
     )
 

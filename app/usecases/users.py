@@ -150,7 +150,10 @@ async def update_password(
             user_feedback="User not found.",
         )
 
-    if security.check_osu_password(user.hashed_password, current_password):
+    if security.check_osu_password(
+        untrusted_password=current_password,
+        hashed_password=user.hashed_password,
+    ):
         return Error(
             error_code=ErrorCode.INCORRECT_CREDENTIALS,
             user_feedback="Incorrect password.",
@@ -173,7 +176,10 @@ async def update_email_address(
             user_feedback="User not found.",
         )
 
-    if security.check_osu_password(user.hashed_password, current_password):
+    if security.check_osu_password(
+        untrusted_password=current_password,
+        hashed_password=user.hashed_password,
+    ):
         return Error(
             error_code=ErrorCode.INCORRECT_CREDENTIALS,
             user_feedback="Incorrect password.",
