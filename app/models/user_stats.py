@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class UserStats(BaseModel):
     ranked_score: int
     total_score: int
@@ -18,3 +19,8 @@ class UserStats(BaseModel):
     c_count: int
     d_count: int
     max_combo: int
+
+
+class AllTimePP(BaseModel):
+    pp: int
+    user_id: int

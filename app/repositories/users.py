@@ -159,3 +159,14 @@ async def update_email_address(user_id: int, new_email_address: str) -> None:
     }
 
     await app.state.database.execute(query, params)
+
+
+async def fetch_total_registered_user_count() -> int:
+    query = """\
+        SELECT COUNT(*)
+        FROM users
+    """
+    val = await app.state.database.fetch_val(query)
+    if val is None:
+        return 0
+    return val

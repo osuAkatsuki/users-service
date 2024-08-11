@@ -188,3 +188,7 @@ async def update_email_address(
 
     await users.update_email_address(user_id, new_email_address)
     return None
+
+
+async def fetch_total_registered_user_count() -> int:
+    return await users.fetch_total_registered_user_count()
