@@ -15,9 +15,9 @@ async def fetch_total_registered_user_count() -> Response:
     )
 
 
-@router.get("/public/api/v1/overall-stats/global-all-time-pp-earned")
-async def get_global_all_time_pp_earned() -> Response:
-    response = await user_stats.fetch_global_all_time_pp_earned()
+@router.get("/public/api/v1/overall-stats/total-pp-earned")
+async def get_global_total_pp_earned() -> Response:
+    response = await user_stats.fetch_global_total_pp_earned()
     return JSONResponse(
         content=response,
         status_code=200,

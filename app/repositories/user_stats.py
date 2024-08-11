@@ -68,7 +68,7 @@ async def fetch_one_by_user_id_and_akatsuki_mode(
     )
 
 
-async def fetch_global_all_time_pp_earned() -> int:
+async def fetch_global_total_pp_earned() -> int:
     # NOTE: this query is not representative of the actual
     # "total pp earned over all time" because it only regards
     # the pp earned based on their all-time best scores, rather

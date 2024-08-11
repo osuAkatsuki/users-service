@@ -36,5 +36,5 @@ async def fetch_one_by_user_id_and_akatsuki_mode(
     )
 
 
-async def fetch_global_all_time_pp_earned() -> int:
-    return await user_stats.fetch_global_all_time_pp_earned()
+async def fetch_global_total_pp_earned() -> int:
+    return await user_stats.fetch_global_total_pp_earned()
