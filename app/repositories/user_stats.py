@@ -79,9 +79,7 @@ async def fetch_global_all_time_pp_earned() -> int:
         SELECT SUM(pp) as total_pp
         FROM user_stats
     """
-
     val = await app.state.database.fetch_val(query)
     if val is None:
         return 0
-
     return val
