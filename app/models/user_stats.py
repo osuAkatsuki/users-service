@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class UserStats(BaseModel):
     ranked_score: int
     total_score: int

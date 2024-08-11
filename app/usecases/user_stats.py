@@ -34,3 +34,7 @@ async def fetch_one_by_user_id_and_akatsuki_mode(
         d_count=stats.d_count,
         max_combo=stats.max_combo,
     )
+
+
+async def fetch_global_all_time_pp_earned() -> int:
+    return await user_stats.fetch_global_all_time_pp_earned()

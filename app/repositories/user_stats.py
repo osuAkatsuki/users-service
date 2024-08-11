@@ -66,3 +66,20 @@ async def fetch_one_by_user_id_and_akatsuki_mode(
         d_count=user_stats["d_count"],
         max_combo=user_stats["max_combo"],
     )
+
+
+async def fetch_global_all_time_pp_earned() -> int:
+    # NOTE: this query is not representative of the actual
+    # "total pp earned over all time" because it only regards
+    # the pp earned based on their all-time best scores, rather
+    # than the sum of all pp earned from all scores over time.
+    # It would be more difficult to calculat the latter, but
+    # it would be more accurate.
+    query = """
+        SELECT SUM(pp) as total_pp
+        FROM user_stats
+    """
+    val = await app.state.database.fetch_val(query)
+    if val is None:
+        return 0
+    return val
