@@ -19,8 +19,3 @@ class UserStats(BaseModel):
     c_count: int
     d_count: int
     max_combo: int
-
-
-class AllTimePP(BaseModel):
-    pp: int
-    user_id: int
