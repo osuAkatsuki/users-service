@@ -334,6 +334,7 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     else:
         logging.info(
             "Successfully processed GDPR/CCPA user deletion request",
+            # NOTE: intentionally not logging any pii
             extra={"user_id": user_id},
         )
         await transaction.commit()
