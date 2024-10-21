@@ -327,6 +327,10 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
             extra={"user_id": user_id},
         )
         await transaction.rollback()
+        return Error(
+            error_code=ErrorCode.INTERNAL_SERVER_ERROR,
+            user_feedback="Failed to process user deletion request.",
+        )
     else:
         logging.info(
             "Successfully processed GDPR/CCPA user deletion request",
