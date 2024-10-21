@@ -53,14 +53,14 @@ class LastfmFlagType(IntFlag):
 
 class LastfmFlag(BaseModel):
     id: int
-    userid: int
+    user_id: int
     timestamp: int
     flag_enum: LastfmFlagType
     flag_text: str
 
 
 READ_PARAMS = """\
-    id, userid, timestamp, flag_enum, flag_text
+    id, user_id, timestamp, flag_enum, flag_text
 """
 
 
@@ -68,7 +68,7 @@ async def delete_many_by_user_id(user_id: int, /) -> list[LastfmFlag]:
     query = f"""\
         SELECT {READ_PARAMS}
         FROM lastfm_flags
-        WHERE userid = :user_id
+        WHERE user_id = :user_id
     """
     params: dict[str, Any] = {"user_id": user_id}
     recs = await app.state.database.fetch_all(query, params)
@@ -77,7 +77,7 @@ async def delete_many_by_user_id(user_id: int, /) -> list[LastfmFlag]:
 
     query = """\
         DELETE FROM lastfm_flags
-        WHERE userid = :user_id
+        WHERE user_id = :user_id
     """
     params: dict[str, Any] = {"user_id": user_id}
     await app.state.database.execute(query, params)
@@ -85,7 +85,7 @@ async def delete_many_by_user_id(user_id: int, /) -> list[LastfmFlag]:
     return [
         LastfmFlag(
             id=rec["id"],
-            userid=rec["userid"],
+            user_id=rec["user_id"],
             timestamp=rec["timestamp"],
             flag_enum=LastfmFlagType(rec["flag_enum"]),
             flag_text=rec["flag_text"],

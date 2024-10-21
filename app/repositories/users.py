@@ -1,8 +1,10 @@
+import secrets
 from datetime import datetime
 
 from pydantic import BaseModel
 
 import app.state
+from app import security
 from app.common_types import GameMode
 from app.common_types import UserPlayStyle
 from app.common_types import UserPrivileges
@@ -174,12 +176,27 @@ async def fetch_total_registered_user_count() -> int:
 
 async def anonymize_one_by_user_id(user_id: int, /) -> None:
     dt = datetime.now().isoformat()
+    new_hashed_password = security.hash_osu_password(secrets.token_hex(16))
     await app.state.database.execute(
         """\
         UPDATE users
            SET username = :username,
+               username_safe = :username_safe,
+               username_aka = :username_aka,
+               password_md5 = :password_md5,
                email = :email,
                userpage_content = :userpage_content,
+               silence_end = :silence_end,
+               donor_expire = :donor_expire,
+               latest_activity = :latest_activity,
+               register_datetime = :register_datetime,
+               ban_datetime = :ban_datetime,
+               silence_reason = :silence_reason,
+               freeze_reason = :freeze_reason,
+               can_custom_badge = :can_custom_badge,
+               show_custom_badge = :show_custom_badge,
+               custom_badge_icon = :custom_badge_icon,
+               custom_badge_name = :custom_badge_name,
                notes = :notes,
                country = :country,
                privileges = :privileges,
@@ -187,9 +204,24 @@ async def anonymize_one_by_user_id(user_id: int, /) -> None:
            WHERE id = :user_id
         """,
         {
+            "user_id": user_id,
             "username": f"deleted_user_{user_id}",
+            "username_safe": f"deleted_user_{user_id}",
+            "username_aka": f"deleted_user_{user_id}",
+            "password_md5": new_hashed_password,
             "email": f"delete_user_{user_id}@example.com",
             "userpage_content": f"[{dt}] This user has been deleted.",
+            "silence_end": 0,
+            "donor_expire": 0,
+            "latest_activity": 0,
+            "register_datetime": 0,
+            "ban_datetime": 0,
+            "silence_reason": "",
+            "freeze_reason": "",
+            "can_custom_badge": False,
+            "show_custom_badge": False,
+            "custom_badge_icon": "",
+            "custom_badge_name": "",
             "notes": f"[{dt}] This user has been deleted.",
             "country": "XX",
             "privileges": UserPrivileges(0),
