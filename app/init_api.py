@@ -24,7 +24,7 @@ from app.api import api_router
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.configure_logging()
     await state.database.connect()
-    await state.redis.initialize()
+    await state.redis.initialize()  # type: ignore[unused-awaitable]
 
     aws_session = aiobotocore.session.get_session()
     s3_client = aws_session.create_client(

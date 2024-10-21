@@ -171,7 +171,7 @@ async def fetch_total_registered_user_count() -> int:
     val = await app.state.database.fetch_val(query)
     if val is None:
         return 0
-    return val
+    return int(val)
 
 
 async def anonymize_one_by_user_id(user_id: int, /) -> None:

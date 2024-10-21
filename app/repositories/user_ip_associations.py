@@ -32,7 +32,7 @@ async def delete_many_by_user_id(user_id: int, /) -> list[UserIpAssociation]:
         DELETE FROM ip_user
         WHERE userid = :user_id
     """
-    params: dict[str, Any] = {"user_id": user_id}
+    params = {"user_id": user_id}
     await app.state.database.execute(query, params)
 
     return [

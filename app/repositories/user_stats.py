@@ -81,4 +81,4 @@ async def fetch_global_total_pp_earned() -> int:
     val = await app.state.database.fetch_val(query)
     if val is None:
         return 0
-    return val
+    return int(val)
