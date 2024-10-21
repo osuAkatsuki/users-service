@@ -1,11 +1,9 @@
 import logging
 
 from fastapi import APIRouter
-from fastapi import Cookie
 from fastapi import Response
-from pydantic import BaseModel
+from fastapi import status
 
-from app.api import authorization
 from app.api.responses import JSONResponse
 from app.errors import Error
 from app.errors import ErrorCode
@@ -45,7 +43,5 @@ async def delete_user(user_id: int) -> Response:
             status_code=map_error_code_to_http_status_code(response.error_code),
         )
 
-    return JSONResponse(
-        content=response.model_dump(),
-        status_code=200,
-    )
+    # TODO: check if response body is b"none"
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
