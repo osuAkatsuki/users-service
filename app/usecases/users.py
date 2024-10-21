@@ -318,7 +318,8 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
         # TODO: (technically required) anonymize data in data backups
 
         # inform other systems of the user's deletion (or "ban")
-        # TODO: redis peppy.ban pubsub
+        await app.state.redis.publish("peppy:ban", str(user_id))
+
         # TODO: make sure they're removed from leaderboards
     except Exception:
         logging.exception(
