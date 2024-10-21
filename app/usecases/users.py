@@ -10,6 +10,7 @@ from app.models.users import CustomBadge
 from app.models.users import TournamentBadge
 from app.models.users import User
 from app.repositories import clans
+from app.repositories import lastfm_flags
 from app.repositories import password_recovery
 from app.repositories import user_badges
 from app.repositories import user_hwid_associations
@@ -300,8 +301,12 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
         # TODO: consider what ac data should be anonymized instead of wiped
         await user_ip_associations.delete_many_by_user_id(user_id)
         await user_hwid_associations.delete_many_by_user_id(user_id)
+        await lastfm_flags.delete_many_by_user_id(user_id)
+        # TODO: patcher_detections & patcher_token_logs
 
-        # TODO: wipe or anonymize all replay data
+        # TODO: wipe or anonymize all replay data.
+        #       probably a good idea to call scores-service
+
         # TODO: wipe all static content (screenshots, profile bgs, etc.)
         # TODO: potentially wipe youtube uploads
 
@@ -309,6 +314,8 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
         # TODO: split this to make it more clear what's being done
         #       at the usecase layer
         await users.anonymize_one_by_user_id(user_id)
+
+        # TODO: (technically required) anonymize data in data backups
 
         # inform other systems of the user's deletion (or "ban")
         # TODO: redis peppy.ban pubsub
