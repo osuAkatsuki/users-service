@@ -173,12 +173,14 @@ async def fetch_total_registered_user_count() -> int:
 
 
 async def anonymize_one_by_user_id(user_id: int, /) -> None:
+    dt = datetime.now().isoformat()
     await app.state.database.execute(
         """\
         UPDATE users
            SET username = :username,
                email = :email,
                userpage_content = :userpage_content,
+               notes = :notes,
                country = :country,
                privileges = :privileges,
                clan_id = :clan_id
@@ -187,7 +189,8 @@ async def anonymize_one_by_user_id(user_id: int, /) -> None:
         {
             "username": f"deleted_user_{user_id}",
             "email": f"delete_user_{user_id}@example.com",
-            "userpage_content": "This user has been deleted.",
+            "userpage_content": f"[{dt}] This user has been deleted.",
+            "notes": f"[{dt}] This user has been deleted.",
             "country": "XX",
             "privileges": UserPrivileges(0),
             "clan_id": 0,
