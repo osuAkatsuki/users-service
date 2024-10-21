@@ -1,3 +1,6 @@
+import logging
+
+import app.state
 from app import security
 from app.common_types import UserPrivileges
 from app.errors import Error
@@ -199,7 +202,10 @@ async def fetch_total_registered_user_count() -> int:
 
 
 async def delete_one_by_user_id(user_id: int, /) -> None | Error:
-
+    """\
+    An anonymization process for user deletion, mainly implemented
+    for the purpose of complying with GDPR, CCPA and other regulations.
+    """
     # sql tables associated with users:
     # - [anonymize] users
     # - [leave as-is] users_stats
@@ -258,50 +264,66 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     # - (potetnailly) user notes
     # - (potentially) userpage content
 
-    user = await users.fetch_one_by_user_id(user_id)
-    if user is None:
-        return Error(
-            error_code=ErrorCode.NOT_FOUND,
-            user_feedback="User not found.",
+    transaction = await app.state.database.transaction()
+    try:
+        user = await users.fetch_one_by_user_id(user_id)
+        if user is None:
+            return Error(
+                error_code=ErrorCode.NOT_FOUND,
+                user_feedback="User not found.",
+            )
+
+        if user.clan_id:
+            clan = await clans.fetch_one_by_clan_id(user.clan_id)
+            if clan is not None:
+                if user.id == clan.owner:
+                    # transfer clan ownership to another member, if available
+                    other_clan_members = sorted(
+                        [
+                            u
+                            for u in await users.fetch_many_by_clan_id(user.clan_id)
+                            if u.id != user.id
+                        ],
+                        # XXX: heuristic; clan join date would be better
+                        #      but it is not something we currently store
+                        key=lambda u: (u.privileges, u.latest_activity),
+                    )
+                    if other_clan_members:
+                        new_owner = other_clan_members[0]
+                        await clans.update_owner(user.clan_id, new_owner.id)
+                    else:
+                        # no other members in the clan; just delete it
+                        await clans.delete_one_by_clan_id(user.clan_id)
+
+        await password_recovery.delete_many_by_username(user.username)
+
+        # TODO: consider what ac data should be anonymized instead of wiped
+        await user_ip_associations.delete_many_by_user_id(user_id)
+        await user_hwid_associations.delete_many_by_user_id(user_id)
+
+        # TODO: wipe or anonymize all replay data
+        # TODO: wipe all static content (screenshots, profile bgs, etc.)
+        # TODO: potentially wipe youtube uploads
+
+        # last step of the process; remove all associated pii
+        # TODO: split this to make it more clear what's being done
+        #       at the usecase layer
+        await users.anonymize_one_by_user_id(user_id)
+
+        # inform other systems of the user's deletion (or "ban")
+        # TODO: redis peppy.ban pubsub
+        # TODO: make sure they're removed from leaderboards
+    except Exception:
+        logging.exception(
+            "Failed to process GDPR/CCPA user deletion request",
+            extra={"user_id": user_id},
         )
-
-    if user.clan_id:
-        clan = await clans.fetch_one_by_clan_id(user.clan_id)
-        if clan is not None:
-            if user.id == clan.owner:
-                # transfer clan ownership to another member, if available
-                other_clan_members = sorted(
-                    [
-                        u
-                        for u in await users.fetch_many_by_clan_id(user.clan_id)
-                        if u.id != user.id
-                    ],
-                    # XXX: heuristic; clan join date would be better
-                    #      but it is not something we currently store
-                    key=lambda u: (u.privileges, u.latest_activity),
-                )
-                if other_clan_members:
-                    new_owner = other_clan_members[0]
-                    await clans.update_owner(user.clan_id, new_owner.id)
-                else:
-                    # no other members in the clan; just delete it
-                    await clans.delete_one_by_clan_id(user.clan_id)
-
-    await password_recovery.delete_many_by_username(user.username)
-
-    # TODO: consider what ac data should be anonymized instead of wiped
-    await user_ip_associations.delete_many_by_user_id(user_id)
-    await user_hwid_associations.delete_many_by_user_id(user_id)
-
-    # TODO: wipe all replay data
-    # TODO: wipe all associated content
-    # TODO: potentially wipe youtube uploads
-
-    # last step of the process; remove all associated pii
-    await users.anonymize_one_by_user_id(user_id)
-
-    # inform other systems of the user's deletion (or "ban")
-    # TODO: redis peppy.ban pubsub
-    # TODO: make sure they're removed from leaderboards
+        await transaction.rollback()
+    else:
+        logging.info(
+            "Successfully processed GDPR/CCPA user deletion request",
+            extra={"user_id": user_id},
+        )
+        await transaction.commit()
 
     return None
