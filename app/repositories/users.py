@@ -170,3 +170,60 @@ async def fetch_total_registered_user_count() -> int:
     if val is None:
         return 0
     return val
+
+
+async def anonymize_one_by_user_id(user_id: int, /) -> None:
+    await app.state.database.execute(
+        """\
+        UPDATE users
+           SET username = :username,
+               email = :email,
+               userpage_content = :userpage_content,
+               country = :country,
+               privileges = :privileges,
+               clan_id = :clan_id
+           WHERE id = :user_id
+        """,
+        {
+            "username": f"deleted_user_{user_id}",
+            "email": f"delete_user_{user_id}@example.com",
+            "userpage_content": "This user has been deleted.",
+            "country": "XX",
+            "privileges": UserPrivileges(0),
+            "clan_id": 0,
+        },
+    )
+
+
+async def fetch_many_by_clan_id(clan_id: int, /) -> list[User]:
+    query = f"""\
+        SELECT {READ_PARAMS}
+        FROM users
+        WHERE clan_id = :clan_id
+    """
+    params = {"clan_id": clan_id}
+
+    users = await app.state.database.fetch_all(query, params)
+    return [
+        User(
+            id=user["id"],
+            username=user["username"],
+            username_aka=user["username_aka"],
+            created_at=datetime.fromtimestamp(user["register_datetime"]),
+            latest_activity=datetime.fromtimestamp(user["latest_activity"]),
+            userpage_content=user["userpage_content"],
+            country=user["country"],
+            privileges=UserPrivileges(user["privileges"]),
+            hashed_password=user["password_md5"],
+            clan_id=user["clan_id"],
+            play_style=UserPlayStyle(user["play_style"]),
+            favourite_mode=GameMode(user["favourite_mode"]),
+            custom_badge_icon=user["custom_badge_icon"],
+            custom_badge_name=user["custom_badge_name"],
+            can_custom_badge=user["can_custom_badge"],
+            show_custom_badge=user["show_custom_badge"],
+            silence_reason=user["silence_reason"],
+            silence_end=user["silence_end"],
+        )
+        for user in users
+    ]
