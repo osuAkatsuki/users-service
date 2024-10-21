@@ -300,4 +300,8 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     # last step of the process; remove all associated pii
     await users.anonymize_one_by_user_id(user_id)
 
+    # inform other systems of the user's deletion (or "ban")
+    # TODO: redis peppy.ban pubsub
+    # TODO: make sure they're removed from leaderboards
+
     return None
