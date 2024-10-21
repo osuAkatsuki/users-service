@@ -225,7 +225,7 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     # - [leave as-is] clan_requests (empty?)
     # - [leave as-is] comments
     # - [leave as-is] matches
-    # - [leave as-is] match_eventrs
+    # - [leave as-is] match_events
     # - [leave as-is] match_games
     # - [leave as-is] match_game_scores
     # - [TODO/financial] notifications
