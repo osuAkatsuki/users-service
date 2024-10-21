@@ -9,6 +9,8 @@ from app.models.users import User
 from app.repositories import clans
 from app.repositories import password_recovery
 from app.repositories import user_badges
+from app.repositories import user_hwid_associations
+from app.repositories import user_ip_associations
 from app.repositories import user_relationships
 from app.repositories import user_tournament_badges
 from app.repositories import users
@@ -288,6 +290,8 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     await password_recovery.delete_many_by_username(user.username)
 
     # TODO: consider what ac data should be anonymized instead of wiped
+    await user_ip_associations.delete_many_by_user_id(user_id)
+    await user_hwid_associations.delete_many_by_user_id(user_id)
 
     # TODO: wipe all replay data
     # TODO: wipe all associated content
