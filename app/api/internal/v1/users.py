@@ -25,11 +25,6 @@ def map_error_code_to_http_status_code(error_code: ErrorCode) -> int:
 
 
 _error_code_to_http_status_code_map: dict[ErrorCode, int] = {
-    ErrorCode.INCORRECT_CREDENTIALS: 401,
-    ErrorCode.INSUFFICIENT_PRIVILEGES: 401,
-    ErrorCode.PENDING_VERIFICATION: 401,
-    ErrorCode.NOT_FOUND: 404,
-    ErrorCode.CONFLICT: 409,
     ErrorCode.INTERNAL_SERVER_ERROR: 500,
 }
 
