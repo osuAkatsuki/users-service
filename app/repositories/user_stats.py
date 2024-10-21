@@ -1,8 +1,7 @@
 from pydantic import BaseModel
 
-from app.common_types import AkatsukiMode
-
 import app.state
+from app.common_types import AkatsukiMode
 
 
 class UserStats(BaseModel):

@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter
+from fastapi import Response
 from fastapi.responses import JSONResponse
-from app.usecases import user_stats, users
 
+from app.usecases import user_stats
+from app.usecases import users
 
 router = APIRouter(tags=["(Public) Overall Stats API"])
 

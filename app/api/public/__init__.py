@@ -2,8 +2,8 @@ from fastapi import APIRouter
 
 from . import authentication
 from . import overall_stats
-from . import users
 from . import user_stats
+from . import users
 
 public_router = APIRouter()
 

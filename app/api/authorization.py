@@ -1,5 +1,6 @@
 from app import security
-from app.errors import Error, ErrorCode
+from app.errors import Error
+from app.errors import ErrorCode
 from app.repositories import access_tokens
 
 

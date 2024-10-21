@@ -1,5 +1,7 @@
 import logging
-from fastapi import APIRouter, Cookie
+
+from fastapi import APIRouter
+from fastapi import Cookie
 from fastapi import Response
 from pydantic import BaseModel
 
@@ -67,7 +69,7 @@ async def update_username(
         return JSONResponse(
             content=trusted_access_token.model_dump(),
             status_code=map_error_code_to_http_status_code(
-                trusted_access_token.error_code
+                trusted_access_token.error_code,
             ),
         )
 
@@ -100,7 +102,7 @@ async def update_password(
         return JSONResponse(
             content=trusted_access_token.model_dump(),
             status_code=map_error_code_to_http_status_code(
-                trusted_access_token.error_code
+                trusted_access_token.error_code,
             ),
         )
 
@@ -137,7 +139,7 @@ async def update_email_address(
         return JSONResponse(
             content=trusted_access_token.model_dump(),
             status_code=map_error_code_to_http_status_code(
-                trusted_access_token.error_code
+                trusted_access_token.error_code,
             ),
         )
 
