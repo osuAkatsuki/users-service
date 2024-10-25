@@ -1,4 +1,5 @@
 mypy
+pre-commit
 types-aiobotocore[s3]
 types-jmespath
 types-pyyaml
