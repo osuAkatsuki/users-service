@@ -316,6 +316,7 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
         #       at the usecase layer
         await users.anonymize_one_by_user_id(user_id)
         await assets.delete_avatar_by_user_id(user_id)
+
         # TODO: (technically required) anonymize data in data backups
 
         # inform other systems of the user's deletion (or "ban")
