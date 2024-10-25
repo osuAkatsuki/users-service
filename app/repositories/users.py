@@ -1,8 +1,10 @@
+import secrets
 from datetime import datetime
 
 from pydantic import BaseModel
 
 import app.state
+from app import security
 from app.common_types import GameMode
 from app.common_types import UserPlayStyle
 from app.common_types import UserPrivileges
@@ -169,4 +171,94 @@ async def fetch_total_registered_user_count() -> int:
     val = await app.state.database.fetch_val(query)
     if val is None:
         return 0
-    return val
+    return int(val)
+
+
+async def anonymize_one_by_user_id(user_id: int, /) -> None:
+    dt = datetime.now().isoformat()
+    new_hashed_password = security.hash_osu_password(secrets.token_hex(16))
+    await app.state.database.execute(
+        """\
+        UPDATE users
+           SET username = :username,
+               username_safe = :username_safe,
+               username_aka = :username_aka,
+               password_md5 = :password_md5,
+               email = :email,
+               userpage_content = :userpage_content,
+               silence_end = :silence_end,
+               donor_expire = :donor_expire,
+               latest_activity = :latest_activity,
+               register_datetime = :register_datetime,
+               ban_datetime = :ban_datetime,
+               silence_reason = :silence_reason,
+               freeze_reason = :freeze_reason,
+               can_custom_badge = :can_custom_badge,
+               show_custom_badge = :show_custom_badge,
+               custom_badge_icon = :custom_badge_icon,
+               custom_badge_name = :custom_badge_name,
+               notes = :notes,
+               country = :country,
+               privileges = :privileges,
+               clan_id = :clan_id
+           WHERE id = :user_id
+        """,
+        {
+            "user_id": user_id,
+            "username": f"deleted_user_{user_id}",
+            "username_safe": f"deleted_user_{user_id}",
+            "username_aka": f"deleted_user_{user_id}",
+            "password_md5": new_hashed_password,
+            "email": f"delete_user_{user_id}@example.com",
+            "userpage_content": f"[{dt}] This user has been deleted.",
+            "silence_end": 0,
+            "donor_expire": 0,
+            "latest_activity": 0,
+            "register_datetime": 0,
+            "ban_datetime": 0,
+            "silence_reason": "",
+            "freeze_reason": "",
+            "can_custom_badge": False,
+            "show_custom_badge": False,
+            "custom_badge_icon": "",
+            "custom_badge_name": "",
+            "notes": f"[{dt}] This user has been deleted.",
+            "country": "XX",
+            "privileges": UserPrivileges(0),
+            "clan_id": 0,
+        },
+    )
+
+
+async def fetch_many_by_clan_id(clan_id: int, /) -> list[User]:
+    query = f"""\
+        SELECT {READ_PARAMS}
+        FROM users
+        WHERE clan_id = :clan_id
+    """
+    params = {"clan_id": clan_id}
+
+    users = await app.state.database.fetch_all(query, params)
+    return [
+        User(
+            id=user["id"],
+            username=user["username"],
+            username_aka=user["username_aka"],
+            created_at=datetime.fromtimestamp(user["register_datetime"]),
+            latest_activity=datetime.fromtimestamp(user["latest_activity"]),
+            userpage_content=user["userpage_content"],
+            country=user["country"],
+            privileges=UserPrivileges(user["privileges"]),
+            hashed_password=user["password_md5"],
+            clan_id=user["clan_id"],
+            play_style=UserPlayStyle(user["play_style"]),
+            favourite_mode=GameMode(user["favourite_mode"]),
+            custom_badge_icon=user["custom_badge_icon"],
+            custom_badge_name=user["custom_badge_name"],
+            can_custom_badge=user["can_custom_badge"],
+            show_custom_badge=user["show_custom_badge"],
+            silence_reason=user["silence_reason"],
+            silence_end=user["silence_end"],
+        )
+        for user in users
+    ]

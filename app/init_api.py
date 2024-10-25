@@ -6,22 +6,25 @@ import aiobotocore.session
 from databases import Database
 from fastapi import FastAPI
 from fastapi import Request
-from fastapi.exceptions import RequestValidationError
 from fastapi import Response
-from starlette.middleware.base import RequestResponseEndpoint
 from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from redis.asyncio import Redis
+from starlette.middleware.base import RequestResponseEndpoint
+
 from app import logger
 from app import settings
 from app import state
 from app.adapters import mysql
 from app.api import api_router
-from fastapi.responses import JSONResponse
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.configure_logging()
     await state.database.connect()
+    await state.redis.initialize()  # type: ignore[unused-awaitable]
 
     aws_session = aiobotocore.session.get_session()
     s3_client = aws_session.create_client(
@@ -35,6 +38,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     yield
     await state.s3_client.__aexit__(None, None, None)
+    await state.redis.aclose()
     await state.database.disconnect()
 
 
@@ -57,7 +61,8 @@ def init_middleware(app: FastAPI) -> FastAPI:
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(
-        request: Request, exc: RequestValidationError
+        request: Request,
+        exc: RequestValidationError,
     ) -> JSONResponse:
         logging.warning(
             "Request validation failed",
@@ -70,6 +75,13 @@ def init_middleware(app: FastAPI) -> FastAPI:
 
 
 def init_db(app: FastAPI) -> FastAPI:
+    state.redis = Redis(
+        host=settings.REDIS_HOST,
+        port=settings.REDIS_PORT,
+        db=settings.REDIS_DB,
+        username=settings.REDIS_USER,
+        password=settings.REDIS_PASS,
+    )
     state.database = Database(
         url=mysql.create_dsn(
             driver="aiomysql",

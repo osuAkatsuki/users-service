@@ -1,8 +1,7 @@
 from pydantic import BaseModel
 
-from app.common_types import AkatsukiMode
-
 import app.state
+from app.common_types import AkatsukiMode
 
 
 class UserStats(BaseModel):
@@ -82,4 +81,4 @@ async def fetch_global_total_pp_earned() -> int:
     val = await app.state.database.fetch_val(query)
     if val is None:
         return 0
-    return val
+    return int(val)

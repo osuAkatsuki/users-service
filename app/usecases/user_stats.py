@@ -1,12 +1,13 @@
 from app.common_types import AkatsukiMode
-from app.models.user_stats import UserStats
 from app.errors import Error
 from app.errors import ErrorCode
+from app.models.user_stats import UserStats
 from app.repositories import user_stats
 
 
 async def fetch_one_by_user_id_and_akatsuki_mode(
-    user_id: int, mode: AkatsukiMode
+    user_id: int,
+    mode: AkatsukiMode,
 ) -> UserStats | Error:
     stats = await user_stats.fetch_one_by_user_id_and_akatsuki_mode(user_id, mode)
     if stats is None:

@@ -1,5 +1,6 @@
-from enum import IntFlag
 from enum import IntEnum
+from enum import IntFlag
+
 
 class UserPrivileges(IntFlag):
     USER_PUBLIC = 1 << 0

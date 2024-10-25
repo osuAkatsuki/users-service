@@ -21,6 +21,12 @@ DB_HOST = os.environ["DB_HOST"]
 DB_PORT = int(os.environ["DB_PORT"])
 DB_NAME = os.environ["DB_NAME"]
 
+REDIS_HOST = os.environ["REDIS_HOST"]
+REDIS_PORT = int(os.environ["REDIS_PORT"])
+REDIS_DB = int(os.environ["REDIS_DB"])
+REDIS_USER = os.environ["REDIS_USER"]
+REDIS_PASS = os.environ["REDIS_PASS"]
+
 AWS_S3_ENDPOINT_URL = os.environ["AWS_S3_ENDPOINT_URL"]
 AWS_S3_REGION_NAME = os.environ["AWS_S3_REGION_NAME"]
 AWS_S3_BUCKET_NAME = os.environ["AWS_S3_BUCKET_NAME"]

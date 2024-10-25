@@ -1,3 +1,6 @@
+import logging
+
+import app.state
 from app import security
 from app.common_types import UserPrivileges
 from app.errors import Error
@@ -6,7 +9,12 @@ from app.models.users import Badge
 from app.models.users import CustomBadge
 from app.models.users import TournamentBadge
 from app.models.users import User
+from app.repositories import clans
+from app.repositories import lastfm_flags
+from app.repositories import password_recovery
 from app.repositories import user_badges
+from app.repositories import user_hwid_associations
+from app.repositories import user_ip_associations
 from app.repositories import user_relationships
 from app.repositories import user_tournament_badges
 from app.repositories import users
@@ -192,3 +200,143 @@ async def update_email_address(
 
 async def fetch_total_registered_user_count() -> int:
     return await users.fetch_total_registered_user_count()
+
+
+async def delete_one_by_user_id(user_id: int, /) -> None | Error:
+    """\
+    An anonymization process for user deletion, mainly implemented
+    for the purpose of complying with GDPR, CCPA and other regulations.
+    """
+    # sql tables associated with users:
+    # - [anonymize] users
+    # - [leave as-is] users_stats
+    # - [leave as-is] rx_stats
+    # - [leave as-is] ap_stats
+    # - [TODO/AC] ip_user
+    # - [TODO/AC] hw_user
+    # - [leave as-is] user_badges
+    # - [leave as-is] user_tourmnt_badges
+    # - [leave as-is] user_achievements
+    # - [transfer perms if owner & kick] clans
+    # - [leave as-is] identity_tokens
+    # - [leave as-is] irc_tokens
+    # - [TODO/AC] lastfm_flags
+    # - [leave as-is] beatmaps_rating
+    # - [leave as-is] clan_requests (empty?)
+    # - [leave as-is] comments
+    # - [leave as-is] matches
+    # - [leave as-is] match_events
+    # - [leave as-is] match_games
+    # - [leave as-is] match_game_scores
+    # - [TODO/financial] notifications
+    # - [delete; key'd by username??] password_recovery
+    # - [TODO/AC] patcher_detections
+    # - [TODO/AC] patcher_token_logs
+    # - [TODO] profile_backgrounds (and filesystem data)
+    # - [TODO] rap_logs
+    # - [leave as-is] remember
+    # - [leave as-is] reports
+    # - [leave as-is] rework_queue
+    # - [leave as-is] rework_scores
+    # - [leave as-is] rework_stats
+    # - [leave as-is] scheduled_bans
+    # - [leave as-is] scores
+    # - [leave as-is] scores_ap
+    # - [leave as-is] scores_relax
+    # - [leave as-is] scores_first
+    # - [TODO/AC] score_submission_logs
+    # - [leave as-is] tokens
+    # - [leave as-is] user_relationships
+    # - [leave as-is] user_beatmaps
+    # - [leave as-is] user_favourites
+    # - [leave as-is] user_profile_history
+    # - [leave as-is] user_speedruns
+    # - [leave as-is] user_tokens
+
+    # misc.
+    # - [anonymize] replay data for all scores
+    # - [TODO] youtube uploads
+
+    # PII to focus on:
+    # - username / username aka
+    # - email
+    # - clan association
+    # - country
+    # - (potetnailly) user notes
+    # - (potentially) userpage content
+
+    transaction = await app.state.database.transaction()
+    try:
+        user = await users.fetch_one_by_user_id(user_id)
+        if user is None:
+            return Error(
+                error_code=ErrorCode.NOT_FOUND,
+                user_feedback="User not found.",
+            )
+
+        if user.clan_id:
+            clan = await clans.fetch_one_by_clan_id(user.clan_id)
+            if clan is not None:
+                if user.id == clan.owner:
+                    # transfer clan ownership to another member, if available
+                    other_clan_members = sorted(
+                        [
+                            u
+                            for u in await users.fetch_many_by_clan_id(user.clan_id)
+                            if u.id != user.id
+                        ],
+                        # XXX: heuristic; clan join date would be better
+                        #      but it is not something we currently store
+                        key=lambda u: (u.privileges, u.latest_activity),
+                    )
+                    if other_clan_members:
+                        new_owner = other_clan_members[0]
+                        await clans.update_owner(user.clan_id, new_owner.id)
+                    else:
+                        # no other members in the clan; just delete it
+                        await clans.delete_one_by_clan_id(user.clan_id)
+
+        await password_recovery.delete_many_by_username(user.username)
+
+        # TODO: consider what ac data should be anonymized instead of wiped
+        await user_ip_associations.delete_many_by_user_id(user_id)
+        await user_hwid_associations.delete_many_by_user_id(user_id)
+        await lastfm_flags.delete_many_by_user_id(user_id)
+        # TODO: patcher_detections & patcher_token_logs
+
+        # TODO: wipe or anonymize all replay data.
+        #       probably a good idea to call scores-service
+
+        # TODO: wipe all static content (screenshots, profile bgs, etc.)
+        # TODO: potentially wipe youtube uploads
+
+        # last step of the process; remove all associated pii
+        # TODO: split this to make it more clear what's being done
+        #       at the usecase layer
+        await users.anonymize_one_by_user_id(user_id)
+
+        # TODO: (technically required) anonymize data in data backups
+
+        # inform other systems of the user's deletion (or "ban")
+        await app.state.redis.publish("peppy:ban", str(user_id))
+
+        # TODO: make sure they're removed from leaderboards
+    except Exception:
+        logging.exception(
+            "Failed to process GDPR/CCPA user deletion request",
+            extra={"user_id": user_id},
+        )
+        await transaction.rollback()
+        return Error(
+            error_code=ErrorCode.INTERNAL_SERVER_ERROR,
+            user_feedback="Failed to process user deletion request.",
+        )
+    else:
+        logging.info(
+            "Successfully processed GDPR/CCPA user deletion request",
+            # NOTE: intentionally not logging any pii
+            extra={"user_id": user_id},
+        )
+        await transaction.commit()
+
+    return None
