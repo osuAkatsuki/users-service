@@ -6,6 +6,7 @@ from app import settings
 
 assets_service_http_client = httpx.AsyncClient(
     base_url=settings.ASSETS_SERVICE_BASE_URL,
+    headers={"X-Api-Key": settings.ASSETS_SERVICE_API_KEY},
 )
 
 
