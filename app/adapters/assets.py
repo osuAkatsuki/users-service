@@ -9,7 +9,7 @@ assets_service_http_client = httpx.AsyncClient(
 )
 
 
-async def delete_avatar_by_user_id(user_id: int):
+async def delete_avatar_by_user_id(user_id: int) -> None:
     try:
         response = await assets_service_http_client.delete(
             f"/api/v1/users/{user_id}/avatar",
