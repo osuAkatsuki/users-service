@@ -214,15 +214,15 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     # - [leave as-is] users_stats
     # - [leave as-is] rx_stats
     # - [leave as-is] ap_stats
-    # - [TODO/AC] ip_user
-    # - [TODO/AC] hw_user
+    # - [delete for now; TODO anonymize] ip_user
+    # - [delete for now; TODO anonymize] hw_user
     # - [leave as-is] user_badges
     # - [leave as-is] user_tourmnt_badges
     # - [leave as-is] user_achievements
     # - [transfer perms if owner & kick] clans
     # - [leave as-is] identity_tokens
     # - [leave as-is] irc_tokens
-    # - [TODO/AC] lastfm_flags
+    # - [delete] lastfm_flags
     # - [leave as-is] beatmaps_rating
     # - [leave as-is] clan_requests (empty?)
     # - [leave as-is] comments
@@ -230,10 +230,10 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     # - [leave as-is] match_events
     # - [leave as-is] match_games
     # - [leave as-is] match_game_scores
-    # - [TODO/financial] notifications
+    # - [leave-as-is (FINANCE)] notifications
     # - [delete; key'd by username??] password_recovery
-    # - [TODO/AC] patcher_detections
-    # - [TODO/AC] patcher_token_logs
+    # - [delete] patcher_detections
+    # - [delete] patcher_token_logs
     # - [TODO] profile_backgrounds (and filesystem data)
     # - [TODO] rap_logs
     # - [leave as-is] remember
@@ -246,7 +246,7 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     # - [leave as-is] scores_ap
     # - [leave as-is] scores_relax
     # - [leave as-is] scores_first
-    # - [TODO/AC] score_submission_logs
+    # - [delete] score_submission_logs
     # - [leave as-is] tokens
     # - [leave as-is] user_relationships
     # - [leave as-is] user_beatmaps
@@ -258,6 +258,8 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     # misc.
     # - [anonymize] replay data for all scores
     # - [TODO] youtube uploads
+    # - [TODO] static content (screenshots, profile bgs, etc.)
+    # - [TODO] database/fs backups older than 50 days
 
     # PII to focus on:
     # - username / username aka
