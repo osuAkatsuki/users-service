@@ -12,6 +12,8 @@ from app.models.users import User
 from app.repositories import clans
 from app.repositories import lastfm_flags
 from app.repositories import password_recovery
+from app.repositories import patcher_token_logs
+from app.repositories import score_submission_logs
 from app.repositories import user_badges
 from app.repositories import user_hwid_associations
 from app.repositories import user_ip_associations
@@ -302,7 +304,10 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
         await user_ip_associations.delete_many_by_user_id(user_id)
         await user_hwid_associations.delete_many_by_user_id(user_id)
         await lastfm_flags.delete_many_by_user_id(user_id)
-        # TODO: patcher_detections & patcher_token_logs
+
+        await score_submission_logs.delete_many_by_user_id_via_scores_tables(user_id)
+        await patcher_token_logs.delete_many_by_user_id_via_scores_tables(user_id)
+        # TODO: delete user records from `patcher_detections` table as well
 
         # TODO: wipe or anonymize all replay data.
         #       probably a good idea to call scores-service
@@ -315,7 +320,7 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
         #       at the usecase layer
         await users.anonymize_one_by_user_id(user_id)
 
-        # TODO: (technically required) anonymize data in data backups
+        # TODO: don't store backups older than 50 days via sql-backup-job
 
         # inform other systems of the user's deletion (or "ban")
         await app.state.redis.publish("peppy:ban", str(user_id))
