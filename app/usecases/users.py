@@ -2,6 +2,7 @@ import logging
 
 import app.state
 from app import security
+from app.adapters import assets
 from app.common_types import UserPrivileges
 from app.errors import Error
 from app.errors import ErrorCode
@@ -314,7 +315,7 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
         # TODO: split this to make it more clear what's being done
         #       at the usecase layer
         await users.anonymize_one_by_user_id(user_id)
-
+        await assets.delete_avatar_by_user_id(user_id)
         # TODO: (technically required) anonymize data in data backups
 
         # inform other systems of the user's deletion (or "ban")
