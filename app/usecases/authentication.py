@@ -158,14 +158,14 @@ async def initialize_password_reset(
         },
     )
 
-    await mailgun.send_email(
+    await mailgun.send_html_email(
         to_address=user.email,
         subject="Akatsuki Password Reset",
         message=(
             f"Hello {user.username},<br /><br />"
             "Someone (<i>which we really hope was you</i>), requested a password "
-            "reset for your Akatsuki account. In case it was you, please "
-            f"<a href='https://next.akatsuki.gg/reset-password?token={password_reset_token.hashed_token}'>click here</a> "
+            "reset for your Akatsuki account.<br /><br />"
+            f"In case it was you, please <a href='https://next.akatsuki.gg/reset-password?token={password_reset_token.hashed_token}'>click here</a> "
             "to reset your password on Akatsuki.<br />"
             "Otherwise, silently ignore this email.<br /><br />"
             "- The Akatsuki Team"

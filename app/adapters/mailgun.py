@@ -10,17 +10,18 @@ mailgun_http_client = httpx.AsyncClient(
 )
 
 
-async def send_email(*, to_address: str, subject: str, message: str) -> None:
+async def send_html_email(*, to_address: str, subject: str, message: str) -> None:
     try:
         response = await mailgun_http_client.post(
             f"/v3/{settings.MAILGUN_DOMAIN_NAME}/messages",
             auth=httpx.BasicAuth("api", settings.MAILGUN_API_KEY),
             data={
-                "from": f"noreply@{settings.MAILGUN_DOMAIN_NAME}",
+                "from": f"Akatsuki <noreply@{settings.MAILGUN_DOMAIN_NAME}>",
                 "to": to_address,
                 "subject": subject,
-                "text": message,
+                "html": message,
             },
+            # data={"html": message.encode()},
         )
         response.raise_for_status()
     except Exception:
@@ -29,7 +30,7 @@ async def send_email(*, to_address: str, subject: str, message: str) -> None:
             extra={
                 "to_address": to_address,
                 "subject": subject,
-                "message": message,
+                "content": message,
             },
         )
         return None

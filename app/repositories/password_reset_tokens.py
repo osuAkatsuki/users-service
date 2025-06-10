@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 import app.state
@@ -7,7 +9,7 @@ class PasswordResetToken(BaseModel):
     id: int
     hashed_token: str
     username: str
-    created_at: int
+    created_at: datetime
 
 
 READ_PARAMS = """\
@@ -18,7 +20,7 @@ READ_PARAMS = """\
 async def create(*, username: str, hashed_token: str) -> PasswordResetToken:
     query = """\
         INSERT INTO password_recovery (k, u, t)
-        VALUES (:hashed_token, :username, UNIX_TIMESTAMP())
+        VALUES (:hashed_token, :username, NOW())
     """
     params = {"hashed_token": hashed_token, "username": username}
     await app.state.database.execute(query, params)
@@ -28,6 +30,7 @@ async def create(*, username: str, hashed_token: str) -> PasswordResetToken:
         FROM password_recovery
         WHERE k = :hashed_token
     """
+    params = {"hashed_token": hashed_token}
     rec = await app.state.database.fetch_one(query, params)
     assert rec is not None
     return PasswordResetToken(
