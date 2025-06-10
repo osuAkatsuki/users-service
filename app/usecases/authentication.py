@@ -73,7 +73,6 @@ async def authenticate(
     logging.info(
         "User successfully authenticated",
         extra={
-            "username": username,
             "user_id": user.id,
             "client_ip_address": client_ip_address,
             "client_user_agent": client_user_agent,
@@ -210,6 +209,7 @@ async def verify_password_reset(
     logging.info(
         "User successfully reset their password",
         extra={
+            "username": username,
             "user_id": user.id,
             "client_ip_address": client_ip_address,
             "client_user_agent": client_user_agent,
