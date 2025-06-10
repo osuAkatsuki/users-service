@@ -9,7 +9,7 @@ async def authorize_request(
     user_access_token: str,
     expected_user_id: int | None = None,
 ) -> access_tokens.AccessToken | Error:
-    hashed_access_token = security.hash_access_token(user_access_token)
+    hashed_access_token = security.hash_secure_token(user_access_token)
     trusted_access_token = await access_tokens.fetch_one(hashed_access_token)
     if trusted_access_token is None:
         return Error(

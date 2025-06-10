@@ -103,3 +103,53 @@ async def logout(
         samesite="none",
     )
     return http_response
+
+
+class InitializePasswordResetRequest(BaseModel):
+    username: str
+
+
+@router.post("/public/api/v1/init-password-reset")
+async def initialize_password_reset(
+    args: InitializePasswordResetRequest,
+    client_ip_address: str = Header(..., alias="X-Real-IP"),
+    client_user_agent: str = Header(..., alias="User-Agent"),
+) -> Response:
+    response = await authentication.initialize_password_reset(
+        username=args.username,
+        client_ip_address=client_ip_address,
+        client_user_agent=client_user_agent,
+    )
+    if isinstance(response, Error):
+        return JSONResponse(
+            content=response.model_dump(),
+            status_code=map_error_code_to_http_status_code(response.error_code),
+        )
+
+    return Response(status_code=204)
+
+
+class VerifyPasswordResetRequest(BaseModel):
+    hashed_password_reset_token: str
+    new_password: str
+
+
+@router.post("/public/api/v1/verify-password-reset")
+async def verify_password_reset(
+    args: VerifyPasswordResetRequest,
+    client_ip_address: str = Header(..., alias="X-Real-IP"),
+    client_user_agent: str = Header(..., alias="User-Agent"),
+) -> Response:
+    response = await authentication.verify_password_reset(
+        hashed_password_reset_token=args.hashed_password_reset_token,
+        new_password=args.new_password,
+        client_ip_address=client_ip_address,
+        client_user_agent=client_user_agent,
+    )
+    if isinstance(response, Error):
+        return JSONResponse(
+            content=response.model_dump(),
+            status_code=map_error_code_to_http_status_code(response.error_code),
+        )
+
+    return Response(status_code=204)

@@ -10,17 +10,18 @@ class AccessToken(BaseModel):
     privileges: UserPrivileges
     description: str
     private: bool
+    last_updated: int
 
 
 READ_PARAMS = """\
-    user, privileges, description, token, private
+    user, privileges, description, token, private, last_updated
 """
 
 
 async def create(*, user_id: int, hashed_access_token: str) -> AccessToken:
     query = """\
-        INSERT INTO tokens (user, privileges, description, token, private)
-        VALUES (:user_id, 0, 'Access token', :hashed_access_token, TRUE)
+        INSERT INTO tokens (user, privileges, description, token, private, last_updated)
+        VALUES (:user_id, 0, 'Access token', :hashed_access_token, TRUE, UNIX_TIMESTAMP())
     """
     params = {"user_id": user_id, "hashed_access_token": hashed_access_token}
     await app.state.database.execute(query, params)
@@ -38,12 +39,13 @@ async def create(*, user_id: int, hashed_access_token: str) -> AccessToken:
         privileges=UserPrivileges(rec["privileges"]),
         description=rec["description"],
         private=rec["private"],
+        last_updated=rec["last_updated"],
     )
 
 
 async def fetch_one(hashed_access_token: str) -> AccessToken | None:
     query = """\
-        SELECT user, privileges, description, private
+        SELECT user, privileges, description, private, last_updated
         FROM tokens
         WHERE token = :hashed_access_token
     """
@@ -58,6 +60,7 @@ async def fetch_one(hashed_access_token: str) -> AccessToken | None:
         privileges=UserPrivileges(rec["privileges"]),
         description=rec["description"],
         private=rec["private"],
+        last_updated=rec["last_updated"],
     )
 
 
