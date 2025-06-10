@@ -7,8 +7,9 @@ from app import security
 from app.common_types import UserPrivileges
 from app.errors import Error
 from app.errors import ErrorCode
-from app.repositories import access_tokens
+from app.repositories import tokens
 from app.repositories import users
+from app.repositories.tokens import TokenType
 
 
 class Identity(BaseModel):
@@ -61,9 +62,10 @@ async def authenticate(
 
     unhashed_access_token = security.generate_unhashed_access_token()
     hashed_access_token = security.hash_access_token(unhashed_access_token)
-    access_token = await access_tokens.create(
+    access_token = await tokens.create(
         user_id=user.id,
-        hashed_access_token=hashed_access_token,
+        hashed_token=hashed_access_token,
+        token_type=TokenType.ACCESS_TOKEN,
     )
 
     # TODO: log amplitude web_login event
@@ -95,9 +97,12 @@ async def logout(
     *,
     client_ip_address: str,
     client_user_agent: str,
-    trusted_access_token: access_tokens.AccessToken,
+    trusted_access_token: tokens.Token,
 ) -> None | Error:
-    await access_tokens.delete_one(trusted_access_token.hashed_access_token)
+    await tokens.delete_one(
+        trusted_access_token.hashed_token,
+        token_type=TokenType.ACCESS_TOKEN,
+    )
 
     logging.info(
         "User successfully logged out",
