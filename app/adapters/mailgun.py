@@ -28,7 +28,7 @@ async def send_html_email(*, to_address: str, subject: str, message: str) -> Non
             extra={
                 "to_address": to_address,
                 "subject": subject,
-                "content": message,
+                "html_content": message,
             },
         )
         return None
