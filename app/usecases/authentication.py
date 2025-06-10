@@ -166,8 +166,7 @@ async def initialize_password_reset(
             "Someone (<i>which we really hope was you</i>), requested a password "
             "reset for your Akatsuki account.<br /><br />"
             f"In case it was you, please <a href='https://next.akatsuki.gg/reset-password?token={password_reset_token.hashed_token}'>click here</a> "
-            "to reset your password on Akatsuki.<br />"
-            "Otherwise, silently ignore this email.<br /><br />"
+            "to reset your password on Akatsuki, otherwise, silently ignore this email.<br /><br />"
             "- The Akatsuki Team"
         ),
     )
