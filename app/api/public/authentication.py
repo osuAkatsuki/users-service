@@ -105,9 +105,13 @@ async def logout(
     return http_response
 
 
+class InitializePasswordResetRequest(BaseModel):
+    username: str
+
+
 @router.post("/public/api/v1/init-password-reset")
 async def initialize_password_reset(
-    args: AuthenticationRequest,
+    args: InitializePasswordResetRequest,
     client_ip_address: str = Header(..., alias="X-Real-IP"),
     client_user_agent: str = Header(..., alias="User-Agent"),
 ) -> Response:
@@ -148,17 +152,4 @@ async def verify_password_reset(
             status_code=map_error_code_to_http_status_code(response.error_code),
         )
 
-    http_response = JSONResponse(
-        content=response.identity.model_dump(),
-        status_code=200,
-    )
-    http_response.set_cookie(
-        "X-Ripple-Token",
-        value=response.unhashed_access_token,
-        expires=60 * 60 * 24 * 30,
-        domain="akatsuki.gg",
-        secure=True,
-        httponly=True,
-        samesite="none",
-    )
-    return http_response
+    return Response(status_code=204)
