@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from app import security
 from app.adapters import mailgun
+from app.adapters import recaptcha
 from app.common_types import UserPrivileges
 from app.errors import Error
 from app.errors import ErrorCode
@@ -178,9 +179,19 @@ async def verify_password_reset(
     *,
     hashed_password_reset_token: str,
     new_password: str,
+    recaptcha_token: str,
     client_ip_address: str,
     client_user_agent: str,
 ) -> None | Error:
+    if not await recaptcha.verify_recaptcha(
+        recaptcha_token=recaptcha_token,
+        client_ip_address=client_ip_address,
+    ):
+        return Error(
+            error_code=ErrorCode.INCORRECT_CREDENTIALS,
+            user_feedback="Invalid reCAPTCHA token.",
+        )
+
     password_reset_token = await password_reset_tokens.fetch_one(
         hashed_password_reset_token,
     )

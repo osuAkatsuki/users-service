@@ -132,6 +132,7 @@ async def initialize_password_reset(
 class VerifyPasswordResetRequest(BaseModel):
     hashed_password_reset_token: str
     new_password: str
+    recaptcha_token: str
 
 
 @router.post("/public/api/v1/verify-password-reset")
@@ -143,6 +144,7 @@ async def verify_password_reset(
     response = await authentication.verify_password_reset(
         hashed_password_reset_token=args.hashed_password_reset_token,
         new_password=args.new_password,
+        recaptcha_token=args.recaptcha_token,
         client_ip_address=client_ip_address,
         client_user_agent=client_user_agent,
     )
