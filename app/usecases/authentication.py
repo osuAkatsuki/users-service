@@ -198,10 +198,10 @@ async def verify_password_reset(
             user_feedback="User not found.",
         )
 
-    hashed_new_password = security.hash_osu_password(new_password)
+    new_hashed_password = security.hash_osu_password(new_password)
     await users.update_password(
         user_id=user.id,
-        new_hashed_password=hashed_new_password,
+        new_hashed_password=new_hashed_password,
     )
 
     await password_reset_tokens.delete_one(password_reset_token.hashed_token)
@@ -209,7 +209,7 @@ async def verify_password_reset(
     logging.info(
         "User successfully reset their password",
         extra={
-            "username": username,
+            "username": user.username,
             "user_id": user.id,
             "client_ip_address": client_ip_address,
             "client_user_agent": client_user_agent,
