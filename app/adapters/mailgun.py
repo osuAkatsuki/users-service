@@ -21,7 +21,6 @@ async def send_html_email(*, to_address: str, subject: str, message: str) -> Non
                 "subject": subject,
                 "html": message,
             },
-            # data={"html": message.encode()},
         )
         response.raise_for_status()
     except Exception:
