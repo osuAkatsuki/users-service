@@ -14,6 +14,7 @@ class User(BaseModel):
     id: int
     username: str
     username_aka: str
+    email: str
     created_at: datetime
     latest_activity: datetime
     userpage_content: str | None
@@ -32,7 +33,7 @@ class User(BaseModel):
 
 
 READ_PARAMS = """\
-    id, username, username_aka, register_datetime, latest_activity, userpage_content, country, privileges, password_md5,
+    id, username, username_aka, email, register_datetime, latest_activity, userpage_content, country, privileges, password_md5,
     clan_id, play_style, favourite_mode, custom_badge_icon, custom_badge_name, can_custom_badge, show_custom_badge,
     silence_reason, silence_end
 """
@@ -54,6 +55,7 @@ async def fetch_one_by_username(username: str) -> User | None:
         id=user["id"],
         username=user["username"],
         username_aka=user["username_aka"],
+        email=user["email"],
         created_at=datetime.fromtimestamp(user["register_datetime"]),
         latest_activity=datetime.fromtimestamp(user["latest_activity"]),
         userpage_content=user["userpage_content"],
@@ -88,6 +90,7 @@ async def fetch_one_by_user_id(user_id: int) -> User | None:
         id=user["id"],
         username=user["username"],
         username_aka=user["username_aka"],
+        email=user["email"],
         created_at=datetime.fromtimestamp(user["register_datetime"]),
         latest_activity=datetime.fromtimestamp(user["latest_activity"]),
         userpage_content=user["userpage_content"],
@@ -244,6 +247,7 @@ async def fetch_many_by_clan_id(clan_id: int, /) -> list[User]:
             id=user["id"],
             username=user["username"],
             username_aka=user["username_aka"],
+            email=user["email"],
             created_at=datetime.fromtimestamp(user["register_datetime"]),
             latest_activity=datetime.fromtimestamp(user["latest_activity"]),
             userpage_content=user["userpage_content"],
