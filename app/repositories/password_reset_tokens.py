@@ -19,8 +19,8 @@ READ_PARAMS = """\
 
 async def create(*, username: str, hashed_token: str) -> PasswordResetToken:
     query = """\
-        INSERT INTO password_recovery (k, u, t)
-        VALUES (:hashed_token, :username, NOW())
+        INSERT INTO password_recovery (k, u)
+        VALUES (:hashed_token, :username)
     """
     params = {"hashed_token": hashed_token, "username": username}
     await app.state.database.execute(query, params)
