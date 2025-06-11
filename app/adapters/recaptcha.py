@@ -27,7 +27,7 @@ async def verify_recaptcha(
         response_data = response.json()
         if not isinstance(response_data, dict):
             raise ValueError("Invalid response from recaptcha")
-        return response_data.get("success", False)
+        return response_data.get("success", False) is True
 
     except Exception:
         logging.exception(
