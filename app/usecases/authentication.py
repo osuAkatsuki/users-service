@@ -208,6 +208,12 @@ async def verify_password_reset(
             user_feedback="User not found.",
         )
 
+    if not security.validate_password_meets_requirements(new_password):
+        return Error(
+            error_code=ErrorCode.BAD_REQUEST,
+            user_feedback="Password does not meet security requirements.",
+        )
+
     new_hashed_password = security.hash_osu_password(new_password)
     await users.update_password(
         user_id=user.id,

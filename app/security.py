@@ -41,3 +41,22 @@ def hash_secure_token(unhashed_secure_token: str) -> str:
         unhashed_secure_token.encode(),
         usedforsecurity=False,
     ).hexdigest()
+
+
+def validate_password_meets_requirements(password: str, /) -> bool:
+    """
+    Validates that the password meets the security requirements.
+    - Must be at least 8 characters long
+    - Must contain at least one digit
+    - Must contain at least one uppercase letter
+    - Must contain at least one lowercase letter
+    """
+    if len(password) < 8:
+        return False
+    if not any(char.isdigit() for char in password):
+        return False
+    if not any(char.isupper() for char in password):
+        return False
+    if not any(char.islower() for char in password):
+        return False
+    return True

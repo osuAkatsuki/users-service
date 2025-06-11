@@ -27,6 +27,7 @@ def map_error_code_to_http_status_code(error_code: ErrorCode) -> int:
 
 
 _error_code_to_http_status_code_map: dict[ErrorCode, int] = {
+    ErrorCode.BAD_REQUEST: 400,
     ErrorCode.INCORRECT_CREDENTIALS: 401,
     ErrorCode.INSUFFICIENT_PRIVILEGES: 401,
     ErrorCode.PENDING_VERIFICATION: 401,
