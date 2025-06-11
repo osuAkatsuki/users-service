@@ -107,6 +107,7 @@ async def logout(
 
 class InitializePasswordResetRequest(BaseModel):
     username: str
+    recaptcha_token: str
 
 
 @router.post("/public/api/v1/init-password-reset")
@@ -117,6 +118,7 @@ async def initialize_password_reset(
 ) -> Response:
     response = await authentication.initialize_password_reset(
         username=args.username,
+        recaptcha_token=args.recaptcha_token,
         client_ip_address=client_ip_address,
         client_user_agent=client_user_agent,
     )
