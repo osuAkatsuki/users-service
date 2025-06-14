@@ -1,7 +1,4 @@
 import logging
-from datetime import datetime
-
-from pydantic import BaseModel
 
 from app import security
 from app.adapters import mailgun
