@@ -95,9 +95,7 @@ async def track(
         "insert_id": insert_id,
     }
 
-    amplitude_event: dict[str, Any] = {
-        k: v for k, v in amplitude_event.items() if v is not None
-    }
+    amplitude_event = {k: v for k, v in amplitude_event.items() if v is not None}
 
     try:
         response = await amplitude_http_client.post(
@@ -188,9 +186,7 @@ async def identify(
         "start_version": start_version,
     }
 
-    amplitude_event: dict[str, Any] = {
-        k: v for k, v in amplitude_event.items() if v is not None
-    }
+    amplitude_event = {k: v for k, v in amplitude_event.items() if v is not None}
 
     try:
         response = await amplitude_http_client.post(
