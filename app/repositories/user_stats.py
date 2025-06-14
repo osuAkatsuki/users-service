@@ -30,6 +30,26 @@ READ_PARAMS = """\
 """
 
 
+async def create(
+    *,
+    user_id: int,
+    akatsuki_mode: AkatsukiMode,
+) -> UserStats:
+    query = """
+        INSERT INTO user_stats (user_id, mode)
+        VALUES (:user_id, :akatsuki_mode)
+    """
+    params = {"user_id": user_id, "akatsuki_mode": akatsuki_mode.value}
+
+    await app.state.database.execute(query, params)
+    stats = await fetch_one_by_user_id_and_akatsuki_mode(
+        user_id=user_id,
+        akatsuki_mode=akatsuki_mode,
+    )
+    assert stats is not None
+    return stats
+
+
 async def fetch_one_by_user_id_and_akatsuki_mode(
     user_id: int,
     akatsuki_mode: AkatsukiMode,
