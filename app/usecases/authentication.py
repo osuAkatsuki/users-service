@@ -1,7 +1,4 @@
 import logging
-from datetime import datetime
-
-from pydantic import BaseModel
 
 from app import security
 from app.adapters import mailgun
@@ -9,22 +6,11 @@ from app.adapters import recaptcha
 from app.common_types import UserPrivileges
 from app.errors import Error
 from app.errors import ErrorCode
+from app.models.authentication import AuthorizationGrant
+from app.models.authentication import Identity
 from app.repositories import access_tokens
 from app.repositories import password_reset_tokens
 from app.repositories import users
-
-
-class Identity(BaseModel):
-    user_id: int
-    username: str
-    privileges: UserPrivileges
-
-
-class AuthorizationGrant(BaseModel):
-    unhashed_access_token: str
-    identity: Identity
-    privileges: UserPrivileges
-    expires_at: datetime | None
 
 
 async def authenticate(
@@ -208,7 +194,7 @@ async def verify_password_reset(
             user_feedback="User not found.",
         )
 
-    if not security.validate_password_meets_requirements(new_password):
+    if not security.validate_password(new_password):
         return Error(
             error_code=ErrorCode.BAD_REQUEST,
             user_feedback="Password does not meet security requirements.",
