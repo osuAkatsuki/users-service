@@ -69,8 +69,6 @@ async def authenticate(
         hashed_access_token=hashed_access_token,
     )
 
-    # TODO: log amplitude web_login event
-
     logging.info(
         "User successfully authenticated",
         extra={
@@ -156,8 +154,6 @@ async def initialize_password_reset(
         username=user.username,
         hashed_token=hashed_password_reset_token,
     )
-
-    # TODO: log amplitude (web_)password_reset event
 
     logging.info(
         "User initiated password reset process",
