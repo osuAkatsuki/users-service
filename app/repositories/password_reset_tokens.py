@@ -46,6 +46,7 @@ async def fetch_one(hashed_token: str) -> PasswordResetToken | None:
         SELECT id, u, t
         FROM password_recovery
         WHERE k = :hashed_token
+          AND t > NOW() - INTERVAL 1 HOUR
     """
     params = {"hashed_token": hashed_token}
     rec = await app.state.database.fetch_one(query, params)
