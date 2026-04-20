@@ -2,6 +2,7 @@ aiobotocore
 bcrypt
 cryptography
 databases[aiomysql]
+email-validator
 fastapi
 httpx
 python-dotenv
