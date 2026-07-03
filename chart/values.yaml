@@ -9,7 +9,7 @@ apps:
       targetCPUUtilizationPercentage: 80
     container:
       image:
-        repository: osuakatsuki/users-service
+        repository: ghcr.io/osuakatsuki/users-service
         tag: latest
       port: 80
       readinessProbe:
