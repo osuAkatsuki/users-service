@@ -1,15 +1,22 @@
 import logging
+import time
 
 import app.state
 from app import security
+from app.adapters import amplitude
 from app.adapters import assets
+from app.adapters import recaptcha
+from app.common_types import AkatsukiMode
 from app.common_types import UserPrivileges
 from app.errors import Error
 from app.errors import ErrorCode
+from app.models.authentication import AuthorizationGrant
+from app.models.authentication import Identity
 from app.models.users import Badge
 from app.models.users import CustomBadge
 from app.models.users import TournamentBadge
 from app.models.users import User
+from app.repositories import access_tokens
 from app.repositories import clans
 from app.repositories import lastfm_flags
 from app.repositories import password_recovery
@@ -17,8 +24,126 @@ from app.repositories import user_badges
 from app.repositories import user_hwid_associations
 from app.repositories import user_ip_associations
 from app.repositories import user_relationships
+from app.repositories import user_stats
 from app.repositories import user_tournament_badges
 from app.repositories import users
+
+
+async def create_and_authenticate_user(
+    *,
+    username: str,
+    email_address: str,
+    password: str,
+    recaptcha_token: str,
+    client_ip_address: str,
+    client_user_agent: str,
+) -> AuthorizationGrant | Error:
+    # "SELECT value_int FROM system_settings WHERE name = 'registrations_enabled'").Scan(&enabled)
+
+    if not security.validate_username(username):
+        return Error(
+            error_code=ErrorCode.BAD_REQUEST,
+            user_feedback="Username does not meet requirements.",
+        )
+
+    if not security.validate_email_address(email_address):
+        return Error(
+            error_code=ErrorCode.BAD_REQUEST,
+            user_feedback="Email address does not meet requirements.",
+        )
+
+    if not security.validate_password(password):
+        return Error(
+            error_code=ErrorCode.BAD_REQUEST,
+            user_feedback="Password does not meet requirements.",
+        )
+
+    if await users.username_is_taken(username):
+        return Error(
+            error_code=ErrorCode.CONFLICT,
+            user_feedback="Username is already taken.",
+        )
+
+    if await users.email_address_is_taken(email_address):
+        return Error(
+            error_code=ErrorCode.CONFLICT,
+            user_feedback="Email address is already taken.",
+        )
+
+    if not await recaptcha.verify_recaptcha(
+        recaptcha_token=recaptcha_token,
+        client_ip_address=client_ip_address,
+    ):
+        return Error(
+            error_code=ErrorCode.BAD_REQUEST,
+            user_feedback="Invalid reCAPTCHA response.",
+        )
+
+    hashed_password = security.hash_osu_password(password)
+
+    # TODO: database transaction for atomicity
+    user = await users.create(
+        username=username,
+        email_address=email_address,
+        hashed_password=hashed_password,
+    )
+    for akatsuki_mode in AkatsukiMode:
+        await user_stats.create(
+            user_id=user.id,
+            akatsuki_mode=akatsuki_mode,
+        )
+
+    await amplitude.track(
+        user_id=str(user.id),
+        event_name="web_signup",
+        ip=client_ip_address,
+        # TODO: country, city, region from CF ips
+        # TODO: language from accept-language header
+        # TODO: os name, version, device model from user agent
+        event_properties={"source": "users-service"},
+        user_properties={
+            "username": user.username,
+            "email": user.email,  # TODO: remove
+            "signup_date": int(time.time()),
+            "signup_ip": client_ip_address,
+        },
+    )
+
+    # TODO: what is the "Y" cookie?
+
+    await app.state.redis.incr("ripple:registered_users")
+
+    unhashed_access_token = security.generate_unhashed_secure_token()
+    hashed_access_token = security.hash_secure_token(unhashed_access_token)
+    access_token = await access_tokens.create(
+        user_id=user.id,
+        hashed_access_token=hashed_access_token,
+    )
+
+    # TODO: insert into ip_user table?
+
+    logging.info(
+        "User successfully signed up",
+        extra={
+            "user_id": user.id,
+            "client_ip_address": client_ip_address,
+            "client_user_agent": client_user_agent,
+        },
+    )
+
+    # TODO: make sure they're sent to a verification flow on the FE
+
+    return AuthorizationGrant(
+        # XXX: intentionally send back the unhashed access token
+        unhashed_access_token=unhashed_access_token,
+        privileges=access_token.privileges,
+        expires_at=None,
+        identity=Identity(
+            user_id=user.id,
+            username=user.username,
+            privileges=user.privileges,
+        ),
+    )
 
 
 async def fetch_one_by_username(username: str) -> User | Error:
@@ -135,6 +260,12 @@ async def update_username(user_id: int, *, new_username: str) -> None | Error:
             user_feedback="Only donor may change their usernames.",
         )
 
+    if not security.validate_username(new_username):
+        return Error(
+            error_code=ErrorCode.BAD_REQUEST,
+            user_feedback="Username does not meet requirements.",
+        )
+
     exists = await users.username_is_taken(new_username)
     if exists:
         return Error(
@@ -159,7 +290,7 @@ async def update_password(
             user_feedback="User not found.",
         )
 
-    if not security.validate_password_meets_requirements(new_password):
+    if not security.validate_password(new_password):
         return Error(
             error_code=ErrorCode.BAD_REQUEST,
             user_feedback="Password does not meet security requirements.",

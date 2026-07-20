@@ -39,6 +39,35 @@ READ_PARAMS = """\
 """
 
 
+async def create(
+    *,
+    username: str,
+    email_address: str,
+    hashed_password: str,
+) -> User:
+    query = """\
+        INSERT INTO users (
+            username, username_safe, email, password_md5,
+            register_datetime, latest_activity
+        )
+        VALUES (
+            :username, :username_safe, :email_address, :hashed_password,
+            :register_datetime, :latest_activity
+        )
+    """
+    username_safe = username.lower().replace(" ", "_")
+    params = {
+        "username": username,
+        "username_safe": username_safe,
+        "email_address": email_address,
+        "hashed_password": hashed_password,
+    }
+    await app.state.database.execute(query, params)
+    user = await fetch_one_by_username(username)
+    assert user is not None
+    return user
+
+
 async def fetch_one_by_username(username: str) -> User | None:
     query = f"""\
         SELECT {READ_PARAMS}
@@ -117,6 +146,17 @@ async def username_is_taken(username: str) -> bool:
     """
     username_safe = username.lower().replace(" ", "_")
     params = {"username_safe": username_safe}
+
+    return await app.state.database.fetch_one(query, params) is not None
+
+
+async def email_address_is_taken(email_address: str) -> bool:
+    query = """\
+        SELECT 1
+        FROM users
+        WHERE email = :email_address
+    """
+    params = {"email_address": email_address}
 
     return await app.state.database.fetch_one(query, params) is not None
 

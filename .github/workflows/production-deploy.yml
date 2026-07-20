@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - account-creation
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
