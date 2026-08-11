@@ -13,6 +13,8 @@ from app.models.users import User
 from app.repositories import clans
 from app.repositories import lastfm_flags
 from app.repositories import password_recovery
+from app.repositories import patcher_token_logs
+from app.repositories import score_submission_logs
 from app.repositories import user_badges
 from app.repositories import user_hwid_associations
 from app.repositories import user_ip_associations
@@ -219,15 +221,15 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     # - [leave as-is] users_stats
     # - [leave as-is] rx_stats
     # - [leave as-is] ap_stats
-    # - [TODO/AC] ip_user
-    # - [TODO/AC] hw_user
+    # - [delete for now; TODO anonymize] ip_user
+    # - [delete for now; TODO anonymize] hw_user
     # - [leave as-is] user_badges
     # - [leave as-is] user_tourmnt_badges
     # - [leave as-is] user_achievements
     # - [transfer perms if owner & kick] clans
     # - [leave as-is] identity_tokens
     # - [leave as-is] irc_tokens
-    # - [TODO/AC] lastfm_flags
+    # - [delete] lastfm_flags
     # - [leave as-is] beatmaps_rating
     # - [leave as-is] clan_requests (empty?)
     # - [leave as-is] comments
@@ -235,10 +237,10 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     # - [leave as-is] match_events
     # - [leave as-is] match_games
     # - [leave as-is] match_game_scores
-    # - [TODO/financial] notifications
+    # - [leave-as-is (FINANCE)] notifications
     # - [delete; key'd by username??] password_recovery
-    # - [TODO/AC] patcher_detections
-    # - [TODO/AC] patcher_token_logs
+    # - [delete] patcher_detections
+    # - [delete] patcher_token_logs
     # - [TODO] profile_backgrounds (and filesystem data)
     # - [TODO] rap_logs
     # - [leave as-is] remember
@@ -251,7 +253,7 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     # - [leave as-is] scores_ap
     # - [leave as-is] scores_relax
     # - [leave as-is] scores_first
-    # - [TODO/AC] score_submission_logs
+    # - [delete] score_submission_logs
     # - [leave as-is] tokens
     # - [leave as-is] user_relationships
     # - [leave as-is] user_beatmaps
@@ -263,6 +265,8 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     # misc.
     # - [anonymize] replay data for all scores
     # - [TODO] youtube uploads
+    # - [TODO] static content (screenshots, profile bgs, etc.)
+    # - [TODO] database/fs backups older than 50 days
 
     # PII to focus on:
     # - username / username aka
@@ -309,7 +313,10 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
         await user_ip_associations.delete_many_by_user_id(user_id)
         await user_hwid_associations.delete_many_by_user_id(user_id)
         await lastfm_flags.delete_many_by_user_id(user_id)
-        # TODO: patcher_detections & patcher_token_logs
+
+        await score_submission_logs.delete_many_by_user_id_via_scores_tables(user_id)
+        await patcher_token_logs.delete_many_by_user_id_via_scores_tables(user_id)
+        # TODO: delete user records from `patcher_detections` table as well
 
         # TODO: wipe or anonymize all replay data.
         #       probably a good idea to call scores-service
@@ -323,7 +330,7 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
         await users.anonymize_one_by_user_id(user_id)
         await assets.delete_avatar_by_user_id(user_id)
 
-        # TODO: (technically required) anonymize data in data backups
+        # TODO: don't store backups older than 50 days via sql-backup-job
 
         # inform other systems of the user's deletion (or "ban")
         await app.state.redis.publish("peppy:ban", str(user_id))
