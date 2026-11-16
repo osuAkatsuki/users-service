@@ -236,7 +236,7 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
     # - [leave as-is] match_games
     # - [leave as-is] match_game_scores
     # - [TODO/financial] notifications
-    # - [delete; key'd by username??] password_recovery
+    # - [delete] password_recovery
     # - [TODO/AC] patcher_detections
     # - [TODO/AC] patcher_token_logs
     # - [TODO] profile_backgrounds (and filesystem data)
@@ -303,7 +303,7 @@ async def delete_one_by_user_id(user_id: int, /) -> None | Error:
                         # no other members in the clan; just delete it
                         await clans.delete_one_by_clan_id(user.clan_id)
 
-        await password_recovery.delete_many_by_username(user.username)
+        await password_recovery.delete_many_by_user_id(user_id)
 
         # TODO: consider what ac data should be anonymized instead of wiped
         await user_ip_associations.delete_many_by_user_id(user_id)
