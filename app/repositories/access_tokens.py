@@ -48,6 +48,8 @@ async def fetch_one(hashed_access_token: str) -> AccessToken | None:
         SELECT user, privileges, description, private, last_updated
         FROM tokens
         WHERE token = :hashed_access_token
+          AND private = TRUE
+          AND last_updated >= UNIX_TIMESTAMP() - 30 * 86400
     """
     params = {"hashed_access_token": hashed_access_token}
     rec = await app.state.database.fetch_one(query, params)

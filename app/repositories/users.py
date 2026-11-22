@@ -18,6 +18,7 @@ class User(BaseModel):
     created_at: datetime
     latest_activity: datetime
     userpage_content: str | None
+    userpage_allowed: bool
     country: str
     privileges: UserPrivileges
     hashed_password: str
@@ -33,7 +34,7 @@ class User(BaseModel):
 
 
 READ_PARAMS = """\
-    id, username, username_aka, email, register_datetime, latest_activity, userpage_content, country, privileges, password_md5,
+    id, username, username_aka, email, register_datetime, latest_activity, userpage_content, userpage_allowed, country, privileges, password_md5,
     clan_id, play_style, favourite_mode, custom_badge_icon, custom_badge_name, can_custom_badge, show_custom_badge,
     silence_reason, silence_end
 """
@@ -59,6 +60,7 @@ async def fetch_one_by_username(username: str) -> User | None:
         created_at=datetime.fromtimestamp(user["register_datetime"]),
         latest_activity=datetime.fromtimestamp(user["latest_activity"]),
         userpage_content=user["userpage_content"],
+        userpage_allowed=user["userpage_allowed"],
         country=user["country"],
         privileges=UserPrivileges(user["privileges"]),
         hashed_password=user["password_md5"],
@@ -94,6 +96,7 @@ async def fetch_one_by_user_id(user_id: int) -> User | None:
         created_at=datetime.fromtimestamp(user["register_datetime"]),
         latest_activity=datetime.fromtimestamp(user["latest_activity"]),
         userpage_content=user["userpage_content"],
+        userpage_allowed=user["userpage_allowed"],
         country=user["country"],
         privileges=UserPrivileges(user["privileges"]),
         hashed_password=user["password_md5"],
@@ -149,7 +152,14 @@ async def update_password(user_id: int, *, new_hashed_password: str) -> None:
         "user_id": user_id,
     }
 
-    await app.state.database.execute(query, params)
+    async with app.state.database.transaction():
+        await app.state.database.execute(query, params)
+        await app.state.database.execute(
+            "DELETE FROM tokens WHERE user = :user_id", {"user_id": user_id},
+        )
+        await app.state.database.execute(
+            "DELETE FROM remember WHERE userid = :user_id", {"user_id": user_id},
+        )
 
 
 async def update_email_address(user_id: int, new_email_address: str) -> None:
@@ -251,6 +261,7 @@ async def fetch_many_by_clan_id(clan_id: int, /) -> list[User]:
             created_at=datetime.fromtimestamp(user["register_datetime"]),
             latest_activity=datetime.fromtimestamp(user["latest_activity"]),
             userpage_content=user["userpage_content"],
+            userpage_allowed=user["userpage_allowed"],
             country=user["country"],
             privileges=UserPrivileges(user["privileges"]),
             hashed_password=user["password_md5"],

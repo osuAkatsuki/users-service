@@ -23,7 +23,7 @@ from app.repositories import users
 
 async def fetch_one_by_username(username: str) -> User | Error:
     user = await users.fetch_one_by_username(username)
-    if user is None:
+    if user is None or not user.privileges & UserPrivileges.USER_PUBLIC:
         return Error(error_code=ErrorCode.NOT_FOUND, user_feedback="User not found.")
 
     followers = await user_relationships.fetch_follower_count_by_user_id(user.id)
@@ -36,7 +36,7 @@ async def fetch_one_by_username(username: str) -> User | Error:
         username_aka=user.username_aka,
         created_at=user.created_at,
         latest_activity=user.latest_activity,
-        userpage_content=user.userpage_content,
+        userpage_content=user.userpage_content if user.userpage_allowed else None,
         country=user.country,
         clan_id=user.clan_id,
         followers=followers,
@@ -66,13 +66,13 @@ async def fetch_one_by_username(username: str) -> User | Error:
             icon=user.custom_badge_icon,
         ),
         silence_end=user.silence_end,
-        silence_reason=user.silence_reason,
+        silence_reason="",
     )
 
 
 async def fetch_one_by_user_id(user_id: int) -> User | Error:
     user = await users.fetch_one_by_user_id(user_id)
-    if user is None:
+    if user is None or not user.privileges & UserPrivileges.USER_PUBLIC:
         return Error(error_code=ErrorCode.NOT_FOUND, user_feedback="User not found.")
 
     followers = await user_relationships.fetch_follower_count_by_user_id(user.id)
@@ -85,7 +85,7 @@ async def fetch_one_by_user_id(user_id: int) -> User | Error:
         username_aka=user.username_aka,
         created_at=user.created_at,
         latest_activity=user.latest_activity,
-        userpage_content=user.userpage_content,
+        userpage_content=user.userpage_content if user.userpage_allowed else None,
         country=user.country,
         clan_id=user.clan_id,
         followers=followers,
@@ -115,11 +115,17 @@ async def fetch_one_by_user_id(user_id: int) -> User | Error:
             icon=user.custom_badge_icon,
         ),
         silence_end=user.silence_end,
-        silence_reason=user.silence_reason,
+        silence_reason="",
     )
 
 
 async def update_username(user_id: int, *, new_username: str) -> None | Error:
+    if not security.validate_username(new_username):
+        return Error(
+            error_code=ErrorCode.BAD_REQUEST,
+            user_feedback="Invalid or reserved username.",
+        )
+
     user = await users.fetch_one_by_user_id(user_id)
     if user is None:
         return Error(
@@ -143,6 +149,7 @@ async def update_username(user_id: int, *, new_username: str) -> None | Error:
         )
 
     await users.update_username(user_id, new_username)
+    await app.state.redis.publish("api:change_username", str(user_id))
     return None
 
 
@@ -185,6 +192,12 @@ async def update_email_address(
     current_password: str,
     new_email_address: str,
 ) -> None | Error:
+    if not security.validate_email(new_email_address):
+        return Error(
+            error_code=ErrorCode.BAD_REQUEST,
+            user_feedback="Please use a valid email address.",
+        )
+
     user = await users.fetch_one_by_user_id(user_id)
     if user is None:
         return Error(

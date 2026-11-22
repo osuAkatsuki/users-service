@@ -1,9 +1,12 @@
 import logging
+import secrets
 
 from fastapi import APIRouter
+from fastapi import Header
 from fastapi import Response
 from fastapi import status
 
+from app import settings
 from app.api.responses import JSONResponse
 from app.errors import Error
 from app.errors import ErrorCode
@@ -30,7 +33,12 @@ _error_code_to_http_status_code_map: dict[ErrorCode, int] = {
 
 
 @router.delete("/api/v1/users/{user_id}")
-async def delete_user(user_id: int) -> Response:
+async def delete_user(
+    user_id: int,
+    api_key: str = Header("", alias="X-Api-Key"),
+) -> Response:
+    if not secrets.compare_digest(api_key.encode(), settings.APP_API_KEY.encode()):
+        return Response(status_code=status.HTTP_401_UNAUTHORIZED)
     response = await users.delete_one_by_user_id(user_id)
     if isinstance(response, Error):
         return JSONResponse(
