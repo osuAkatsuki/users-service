@@ -12,6 +12,9 @@ def read_bool(s: str) -> bool:
 APP_ENV = os.environ["APP_ENV"]
 APP_HOST = os.environ["APP_HOST"]
 APP_PORT = int(os.environ["APP_PORT"])
+APP_API_KEY = os.environ["APP_API_KEY"].strip()
+if len(APP_API_KEY) < 32:
+    raise ValueError("APP_API_KEY must contain at least 32 characters")
 
 CODE_HOTRELOAD = read_bool(os.environ["CODE_HOTRELOAD"])
 
@@ -29,9 +32,3 @@ REDIS_PASS = os.environ["REDIS_PASS"]
 
 ASSETS_SERVICE_BASE_URL = os.environ["ASSETS_SERVICE_BASE_URL"]
 ASSETS_SERVICE_API_KEY = os.environ["ASSETS_SERVICE_API_KEY"]
-
-MAILGUN_BASE_URL = os.environ["MAILGUN_BASE_URL"]
-MAILGUN_DOMAIN_NAME = os.environ["MAILGUN_DOMAIN_NAME"]
-MAILGUN_API_KEY = os.environ["MAILGUN_API_KEY"]
-
-RECAPTCHA_SECRET_KEY = os.environ["RECAPTCHA_SECRET_KEY"]

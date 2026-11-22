@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from fastapi import APIRouter
 from fastapi import Cookie
 from fastapi import Header
@@ -104,12 +103,3 @@ async def logout(
         samesite="lax",
     )
     return http_response
-
-
-@router.post("/public/api/v1/init-password-reset")
-@router.post("/public/api/v1/verify-password-reset")
-async def use_website_password_recovery() -> Response:
-    raise HTTPException(
-        status_code=410,
-        detail="Use https://akatsuki.gg/login to recover your password.",
-    )
