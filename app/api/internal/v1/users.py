@@ -1,6 +1,9 @@
 import logging
+import os
+import secrets
 
 from fastapi import APIRouter
+from fastapi import Header
 from fastapi import Response
 from fastapi import status
 
@@ -30,7 +33,15 @@ _error_code_to_http_status_code_map: dict[ErrorCode, int] = {
 
 
 @router.delete("/api/v1/users/{user_id}")
-async def delete_user(user_id: int) -> Response:
+async def delete_user(
+    user_id: int,
+    service_token: str = Header("", alias="X-Users-Service-Token"),
+) -> Response:
+    expected = os.environ.get("USERS_SERVICE_INTERNAL_TOKEN", "")
+    if len(expected.strip()) < 32 or not secrets.compare_digest(
+        service_token.encode(), expected.encode(),
+    ):
+        return Response(status_code=status.HTTP_401_UNAUTHORIZED)
     response = await users.delete_one_by_user_id(user_id)
     if isinstance(response, Error):
         return JSONResponse(
