@@ -261,7 +261,7 @@ async def fetch_many_by_clan_id(clan_id: int, /) -> list[User]:
             created_at=datetime.fromtimestamp(user["register_datetime"]),
             latest_activity=datetime.fromtimestamp(user["latest_activity"]),
             userpage_content=user["userpage_content"],
-        userpage_allowed=user["userpage_allowed"],
+            userpage_allowed=user["userpage_allowed"],
             country=user["country"],
             privileges=UserPrivileges(user["privileges"]),
             hashed_password=user["password_md5"],
